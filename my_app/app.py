@@ -84,10 +84,22 @@ st.markdown("""
     }
     .client-info-footer {
         background-color: #f8f9fa;
-        padding: 1rem;
+        padding: 1.5rem;
         border-radius: 0.5rem;
         margin-top: 2rem;
         border-left: 4px solid #2E8B57;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .client-info-title {
+        font-size: 1.2rem;
+        color: #2E8B57;
+        font-weight: bold;
+        margin-bottom: 1rem;
+        text-align: center;
+    }
+    .client-info-content {
+        font-size: 1rem;
+        line-height: 1.6;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -243,13 +255,14 @@ class GreenGardenProposal:
         """取得頭款金額"""
         try:
             # 如果是現金購買方式，頭款等於產品價格（不含管理費）
-            if price_type in ['cash', 'immediate_cash', 'additional', 'single']:
+            if price_type in ['cash', 'immediate_cash', 'additional', 'single', 'group_cash']:
                 return product_price
             
             # 如果是分期購買方式，使用預設的頭款金額
             price_type_map = {
                 'installment': '預購-分期價',
-                'single_installment': '單購-分期價'
+                'single_installment': '單購-分期價',
+                'group_installment': '團購-分期價'
             }
             
             mapped_price_type = price_type_map.get(price_type, price_type)
@@ -267,13 +280,14 @@ class GreenGardenProposal:
         """取得管理費頭款"""
         try:
             # 如果是現金購買方式，管理費頭款等於總管理費（一次繳清）
-            if price_type in ['cash', 'immediate_cash', 'additional', 'single']:
+            if price_type in ['cash', 'immediate_cash', 'additional', 'single', 'group_cash']:
                 return management_fee
             
             # 如果是分期購買方式，使用預設的管理費頭款金額
             price_type_map = {
                 'installment': '預購-分期價',
-                'single_installment': '單購-分期價'
+                'single_installment': '單購-分期價',
+                'group_installment': '團購-分期價'
             }
             
             mapped_price_type = price_type_map.get(price_type, price_type)
@@ -336,7 +350,9 @@ class GreenGardenProposal:
                 'installment': '分期價',
                 'immediate_cash': '馬上使用-現金價',
                 'additional': '加購-現金價',
-                'single': '單購-現金價'
+                'single': '單購-現金價',
+                'group_cash': '團購-現金價',
+                'group_installment': '團購-分期價'
             }
             
             price_key = price_key_map[price_type]
@@ -362,13 +378,13 @@ class GreenGardenProposal:
             total_management_fee += management_fee
             
             # 只有分期價才顯示分期期數
-            installment_terms = product_data.get('分期期數') if price_type == 'installment' else None
+            installment_terms = product_data.get('分期期數') if price_type in ['installment', 'group_installment'] else None
             
             # 計算產品期款和管理費期款
             product_monthly_payment = 0
             management_monthly_payment = 0
             
-            if price_type == 'installment' and installment_terms:
+            if price_type in ['installment', 'group_installment'] and installment_terms:
                 product_monthly_payment = self.calculate_product_installment_payment(
                     product_price, installment_terms, product_down_payment
                 )
@@ -481,13 +497,22 @@ def main():
             if cemetery_type != "請選擇":
                 spec = st.selectbox("規格", list(proposal_system.cemetery_products[cemetery_type].keys()))
                 quantity = st.number_input("座數", min_value=1, max_value=10, value=1, key=f"{cemetery_type}_quantity")
-                price_type = st.radio("購買方式", ["預購-現金價", "分期價", "馬上使用-現金價"], key=f"{cemetery_type}_price")
+                
+                # 根據產品類型設定購買方式選項
+                if cemetery_type == "恩典園一期" and spec == "晨星2人":
+                    price_options = ["預購-現金價", "分期價", "馬上使用-現金價", "團購-現金價", "團購-分期價"]
+                else:
+                    price_options = ["預購-現金價", "分期價", "馬上使用-現金價"]
+                
+                price_type = st.radio("購買方式", price_options, key=f"{cemetery_type}_price")
                 
                 if st.button(f"加入{cemetery_type}", key=f"add_{cemetery_type}"):
                     price_type_map = {
                         "預購-現金價": "cash",
                         "分期價": "installment",
-                        "馬上使用-現金價": "immediate_cash"
+                        "馬上使用-現金價": "immediate_cash",
+                        "團購-現金價": "group_cash",
+                        "團購-分期價": "group_installment"
                     }
                     new_product = {
                         "category": cemetery_type,
@@ -548,7 +573,9 @@ def main():
                             'cash': '預購-現金價',
                             'installment': '分期價',
                             'additional': '加購-現金價',
-                            'single': '單購-現金價'
+                            'single': '單購-現金價',
+                            'group_cash': '團購-現金價',
+                            'group_installment': '團購-分期價'
                         }
                         st.write(f"**{product['category']}** - {product['spec']}")
                         st.write(f"座數: {product['quantity']} | 方式: {price_type_display[product['price_type']]}")
@@ -617,7 +644,7 @@ def main():
             installment_products = []
             
             for product in st.session_state.selected_products:
-                if product['price_type'] == 'installment':
+                if product['price_type'] in ['installment', 'group_installment']:
                     if product['type'] == 'cemetery':
                         product_data = proposal_system.cemetery_products[product['category']][product['spec']]
                     else:
@@ -629,10 +656,10 @@ def main():
                     
                     if installment_terms:
                         down_payment = proposal_system.get_down_payment(
-                            product['category'], product['spec'], 'installment', product_price, management_fee
+                            product['category'], product['spec'], product['price_type'], product_price, management_fee
                         )
                         management_down_payment = proposal_system.get_management_down_payment(
-                            product['category'], product['spec'], 'installment', product_price, management_fee
+                            product['category'], product['spec'], product['price_type'], product_price, management_fee
                         )
                         
                         monthly_payment = proposal_system.calculate_installment_payment(
@@ -703,27 +730,27 @@ def main():
             </div>
             """, unsafe_allow_html=True)
             st.markdown('</div>', unsafe_allow_html=True)
-            
-            # 客戶資訊顯示在建議書最下方
-            if client_name or consultant_name or contact_phone:
-                st.markdown('<div class="client-info-footer">', unsafe_allow_html=True)
-                st.markdown("**客戶資訊**")
-                col1, col2, col3, col4 = st.columns(4)
-                with col1:
-                    if client_name:
-                        st.write(f"**客戶姓名:** {client_name}")
-                with col2:
-                    if consultant_name:
-                        st.write(f"**專業顧問:** {consultant_name}")
-                with col3:
-                    if contact_phone:
-                        st.write(f"**聯絡電話:** {contact_phone}")
-                with col4:
-                    st.write(f"**日期:** {proposal_date.strftime('%Y-%m-%d')}")
-                st.markdown('</div>', unsafe_allow_html=True)
         
         else:
             st.info("請先在「產品選擇」標籤頁選擇產品")
+        
+        # 客戶資訊顯示在建議書最下方（放在 if st.session_state.selected_products: 區塊之外）
+        if client_name or consultant_name or contact_phone:
+            st.markdown('<div class="client-info-footer">', unsafe_allow_html=True)
+            st.markdown('<div class="client-info-title">客戶資訊</div>', unsafe_allow_html=True)
+            col1, col2, col3, col4 = st.columns(4)
+            with col1:
+                if client_name:
+                    st.markdown(f'<div class="client-info-content"><strong>客戶姓名：</strong>{client_name}</div>', unsafe_allow_html=True)
+            with col2:
+                if consultant_name:
+                    st.markdown(f'<div class="client-info-content"><strong>專業顧問：</strong>{consultant_name}</div>', unsafe_allow_html=True)
+            with col3:
+                if contact_phone:
+                    st.markdown(f'<div class="client-info-content"><strong>聯絡電話：</strong>{contact_phone}</div>', unsafe_allow_html=True)
+            with col4:
+                st.markdown(f'<div class="client-info-content"><strong>日期：</strong>{proposal_date.strftime("%Y-%m-%d")}</div>', unsafe_allow_html=True)
+            st.markdown('</div>', unsafe_allow_html=True)
 
 if __name__ == "__main__":
     main()
