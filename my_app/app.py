@@ -20,12 +20,6 @@ st.markdown("""
         margin-bottom: 2rem;
         gap: 1rem;
     }
-    .logo-bottom-left {
-        position: fixed;
-        bottom: 20px;
-        left: 20px;
-        z-index: 999;
-    }
     .title-container {
         text-align: center;
     }
@@ -54,17 +48,22 @@ st.markdown("""
         color: #FF4444;
         font-weight: bold;
     }
-    .installment-info {
-        background-color: #f8f9fa;
-        padding: 1rem;
-        border-radius: 0.5rem;
-        border: 2px solid #2E8B57;
-        margin: 1rem 0;
-    }
     .installment-item {
         font-size: 1.1rem;
         margin: 0.5rem 0;
         font-weight: bold;
+        padding: 0.5rem;
+        background-color: #f8f9fa;
+        border-radius: 0.3rem;
+    }
+    .dataframe thead th {
+        text-align: center !important;
+    }
+    .dataframe tbody td {
+        text-align: right !important;
+    }
+    .dataframe tbody td:first-child {
+        text-align: left !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -247,224 +246,248 @@ def main():
     contact_phone = st.sidebar.text_input("聯絡電話", value="")
     proposal_date = st.sidebar.date_input("日期", value=datetime.now())
     
+    # 晨暉logo顯示在專業顧問上方
+    try:
+        morning_logo_url = "https://raw.githubusercontent.com/m9606286/green-garden-app/main/my_app/晨暉logo.png"
+        st.sidebar.image(morning_logo_url, width=180)
+    except:
+        st.sidebar.markdown("""
+        <div style="width: 180px; height: 180px; background: #FF6B35; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 16px; text-align: center;">
+            晨暉資產
+        </div>
+        """, unsafe_allow_html=True)
+    
     # 初始化 session state
     if 'selected_products' not in st.session_state:
         st.session_state.selected_products = []
     
-    # 主內容區域 - 合併為一頁
-    st.markdown('<div class="section-header">產品選擇</div>', unsafe_allow_html=True)
+    # 主內容區域 - 兩個標籤頁
+    tab1, tab2 = st.tabs(["📋 產品選擇", "📊 方案詳情"])
     
-    # 產品選擇
-    col1, col2, col3 = st.columns(3)
-    
-    with col1:
-        st.subheader("墓園產品")
-        cemetery_type = st.selectbox("選擇墓園類型", 
-            ["請選擇", "澤茵園", "寶祥家族", "聚賢閣", "永願", "天地", "恩典園一期"])
+    with tab1:
+        st.markdown('<div class="section-header">產品選擇</div>', unsafe_allow_html=True)
         
-        if cemetery_type != "請選擇":
-            spec = st.selectbox("規格", list(proposal_system.cemetery_products[cemetery_type].keys()))
-            quantity = st.number_input("座數", min_value=1, max_value=10, value=1, key=f"{cemetery_type}_quantity")
-            price_type = st.radio("購買方式", ["預購-現金價", "分期價", "馬上使用-現金價"], key=f"{cemetery_type}_price")
-            
-            if st.button(f"加入{cemetery_type}", key=f"add_{cemetery_type}"):
-                price_type_map = {
-                    "預購-現金價": "cash",
-                    "分期價": "installment",
-                    "馬上使用-現金價": "immediate_cash"
-                }
-                new_product = {
-                    "category": cemetery_type,
-                    "spec": spec,
-                    "quantity": quantity,
-                    "price_type": price_type_map[price_type],
-                    "type": "cemetery"
-                }
-                if new_product not in st.session_state.selected_products:
-                    st.session_state.selected_products.append(new_product)
-                    st.success(f"已加入 {cemetery_type} - {spec} x{quantity}")
-                else:
-                    st.warning("此產品已存在於清單中")
-    
-    with col2:
-        st.subheader("牌位產品")
-        memorial_type = st.selectbox("選擇牌位類型", 
-            ["請選擇", "普羅廳", "彌陀廳", "大佛廳"])
-        
-        if memorial_type != "請選擇":
-            spec = st.selectbox("層別", list(proposal_system.memorial_products[memorial_type].keys()), key=f"{memorial_type}_spec")
-            quantity = st.number_input("座數", min_value=1, max_value=10, value=1, key=f"{memorial_type}_quantity")
-            
-            if spec in ["6、9", "7、8"]:
-                price_options = ["加購-現金價", "單購-現金價", "單購分期價"]
-            else:
-                price_options = ["加購-現金價", "單購-現金價"]
-            
-            price_type = st.radio("購買方式", price_options, key=f"{memorial_type}_price")
-            
-            if st.button(f"加入{memorial_type}", key=f"add_{memorial_type}"):
-                price_type_map = {
-                    "加購-現金價": "additional",
-                    "單購-現金價": "single",
-                    "單購分期價": "installment"
-                }
-                new_product = {
-                    "category": memorial_type,
-                    "spec": spec,
-                    "quantity": quantity,
-                    "price_type": price_type_map[price_type],
-                    "type": "memorial"
-                }
-                if new_product not in st.session_state.selected_products:
-                    st.session_state.selected_products.append(new_product)
-                    st.success(f"已加入 {memorial_type} - {spec} x{quantity}")
-                else:
-                    st.warning("此產品已存在於清單中")
-    
-    with col3:
-        st.subheader("已選擇產品")
-        if st.session_state.selected_products:
-            for i, product in enumerate(st.session_state.selected_products):
-                col_a, col_b = st.columns([3, 1])
-                with col_a:
-                    price_type_display = {
-                        'immediate_cash': '馬上使用-現金價',
-                        'cash': '預購-現金價',
-                        'installment': '分期價',
-                        'additional': '加購-現金價',
-                        'single': '單購-現金價'
-                    }
-                    st.write(f"**{product['category']}** - {product['spec']}")
-                    st.write(f"座數: {product['quantity']} | 方式: {price_type_display[product['price_type']]}")
-                with col_b:
-                    if st.button("刪除", key=f"delete_{i}"):
-                        st.session_state.selected_products.pop(i)
-                        st.rerun()
-            
-            if st.button("清空所有產品"):
-                st.session_state.selected_products = []
-                st.rerun()
-        else:
-            st.info("尚未選擇任何產品")
-    
-    # 方案詳情
-    if st.session_state.selected_products:
-        st.markdown('<div class="section-header">方案詳情</div>', unsafe_allow_html=True)
-        
-        totals = proposal_system.calculate_total(st.session_state.selected_products)
-        
-        # 價格總覽
-        col1, col2, col3, col4 = st.columns(4)
+        # 產品選擇
+        col1, col2, col3 = st.columns(3)
         
         with col1:
-            st.metric(label="購買總定價", value=f"{format_currency(totals['total_original'])}")
+            st.subheader("墓園產品")
+            cemetery_type = st.selectbox("選擇墓園類型", 
+                ["請選擇", "澤茵園", "寶祥家族", "聚賢閣", "永願", "天地", "恩典園一期"])
+            
+            if cemetery_type != "請選擇":
+                spec = st.selectbox("規格", list(proposal_system.cemetery_products[cemetery_type].keys()))
+                quantity = st.number_input("座數", min_value=1, max_value=10, value=1, key=f"{cemetery_type}_quantity")
+                price_type = st.radio("購買方式", ["預購-現金價", "分期價", "馬上使用-現金價"], key=f"{cemetery_type}_price")
+                
+                if st.button(f"加入{cemetery_type}", key=f"add_{cemetery_type}"):
+                    price_type_map = {
+                        "預購-現金價": "cash",
+                        "分期價": "installment",
+                        "馬上使用-現金價": "immediate_cash"
+                    }
+                    new_product = {
+                        "category": cemetery_type,
+                        "spec": spec,
+                        "quantity": quantity,
+                        "price_type": price_type_map[price_type],
+                        "type": "cemetery"
+                    }
+                    if new_product not in st.session_state.selected_products:
+                        st.session_state.selected_products.append(new_product)
+                        st.success(f"已加入 {cemetery_type} - {spec} x{quantity}")
+                    else:
+                        st.warning("此產品已存在於清單中")
+        
         with col2:
-            # 自定義折扣顯示
-            st.markdown(f"""
-            <div style="text-align: center;">
-                <div style="font-size: 0.8rem; color: #666; margin-bottom: 0.5rem;">折扣後總價</div>
-                <div style="font-size: 1.5rem; font-weight: bold; margin-bottom: 0.5rem;">{format_currency(totals['total_discounted'])}</div>
-                <div class="discount-text">折扣 {totals['discount_rate']*100:.1f}%</div>
-            </div>
-            """, unsafe_allow_html=True)
-        with col3:
-            st.metric(label="總管理費", value=f"{format_currency(totals['total_management_fee'])}")
-        with col4:
-            st.metric(label="最終總額", value=f"{format_currency(totals['final_total'])}")
-        
-        # 產品明細
-        st.markdown("**產品明細**")
-        product_data = []
-        for detail in totals['product_details']:
-            product_data.append({
-                '產品類型': '墓園' if any(p['category'] == detail['category'] and p['type'] == 'cemetery' for p in st.session_state.selected_products) else '牌位',
-                '產品名稱': detail['category'],
-                '規格': detail['spec'],
-                '座數': detail['quantity'],
-                '購買方式': detail['price_type'],
-                '定價': format_currency(detail['original_price']),
-                '購買價': format_currency(detail['product_price']),
-                '管理費': format_currency(detail['management_fee']),
-                '分期期數': f"{detail['installment_terms']}期" if detail['installment_terms'] else "無分期",
-                '小計': format_currency(detail['subtotal'])
-            })
-        
-        df = pd.DataFrame(product_data)
-        st.dataframe(df, use_container_width=True, hide_index=True)
-        
-        # 分期資訊
-        total_down_payment = 0
-        total_monthly_payment = 0
-        max_installment_terms = 0
-        
-        installment_products = []
-        for product in st.session_state.selected_products:
-            if product['price_type'] == 'installment':
-                if product['type'] == 'cemetery':
-                    product_data = proposal_system.cemetery_products[product['category']][product['spec']]
+            st.subheader("牌位產品")
+            memorial_type = st.selectbox("選擇牌位類型", 
+                ["請選擇", "普羅廳", "彌陀廳", "大佛廳"])
+            
+            if memorial_type != "請選擇":
+                spec = st.selectbox("層別", list(proposal_system.memorial_products[memorial_type].keys()), key=f"{memorial_type}_spec")
+                quantity = st.number_input("座數", min_value=1, max_value=10, value=1, key=f"{memorial_type}_quantity")
+                
+                if spec in ["6、9", "7、8"]:
+                    price_options = ["加購-現金價", "單購-現金價", "單購分期價"]
                 else:
-                    product_data = proposal_system.memorial_products[product['category']][product['spec']]
+                    price_options = ["加購-現金價", "單購-現金價"]
                 
-                product_price = product_data['分期價'] * product['quantity']
-                management_fee = product_data.get('管理費', 0) * product['quantity']
-                installment_terms = product_data.get('分期期數')
+                price_type = st.radio("購買方式", price_options, key=f"{memorial_type}_price")
                 
-                if installment_terms:
-                    down_payment, monthly_payment = proposal_system.calculate_installment_payment(
-                        product_price, management_fee, installment_terms
-                    )
-                    
-                    total_down_payment += down_payment
-                    total_monthly_payment += monthly_payment
-                    max_installment_terms = max(max_installment_terms, installment_terms)
-                    installment_products.append(product)
+                if st.button(f"加入{memorial_type}", key=f"add_{memorial_type}"):
+                    price_type_map = {
+                        "加購-現金價": "additional",
+                        "單購-現金價": "single",
+                        "單購分期價": "installment"
+                    }
+                    new_product = {
+                        "category": memorial_type,
+                        "spec": spec,
+                        "quantity": quantity,
+                        "price_type": price_type_map[price_type],
+                        "type": "memorial"
+                    }
+                    if new_product not in st.session_state.selected_products:
+                        st.session_state.selected_products.append(new_product)
+                        st.success(f"已加入 {memorial_type} - {spec} x{quantity}")
+                    else:
+                        st.warning("此產品已存在於清單中")
         
-        if installment_products:
-            st.markdown("**分期資訊**")
-            st.markdown('<div class="installment-info">', unsafe_allow_html=True)
-            st.markdown(f'<div class="installment-item">頭期款 {format_currency(total_down_payment)}</div>', unsafe_allow_html=True)
-            
-            # 根據不同期數顯示分期資訊
-            if max_installment_terms <= 24:
-                st.markdown(f'<div class="installment-item">1~{max_installment_terms}期 {format_currency(total_monthly_payment)}</div>', unsafe_allow_html=True)
+        with col3:
+            st.subheader("已選擇產品")
+            if st.session_state.selected_products:
+                for i, product in enumerate(st.session_state.selected_products):
+                    col_a, col_b = st.columns([3, 1])
+                    with col_a:
+                        price_type_display = {
+                            'immediate_cash': '馬上使用-現金價',
+                            'cash': '預購-現金價',
+                            'installment': '分期價',
+                            'additional': '加購-現金價',
+                            'single': '單購-現金價'
+                        }
+                        st.write(f"**{product['category']}** - {product['spec']}")
+                        st.write(f"座數: {product['quantity']} | 方式: {price_type_display[product['price_type']]}")
+                    with col_b:
+                        if st.button("刪除", key=f"delete_{i}"):
+                            st.session_state.selected_products.pop(i)
+                            st.rerun()
+                
+                if st.button("清空所有產品"):
+                    st.session_state.selected_products = []
+                    st.rerun()
             else:
-                st.markdown(f'<div class="installment-item">1~24期 {format_currency(total_monthly_payment)}</div>', unsafe_allow_html=True)
-                st.markdown(f'<div class="installment-item">25~{max_installment_terms}期 {format_currency(total_monthly_payment)}</div>', unsafe_allow_html=True)
+                st.info("尚未選擇任何產品")
+    
+    with tab2:
+        st.markdown('<div class="section-header">方案詳情</div>', unsafe_allow_html=True)
+        
+        if st.session_state.selected_products:
+            totals = proposal_system.calculate_total(st.session_state.selected_products)
             
+            # 價格總覽
+            col1, col2, col3, col4 = st.columns(4)
+            
+            with col1:
+                st.metric(label="總定價", value=f"{format_currency(totals['total_original'])}")
+            with col2:
+                # 自定義折扣顯示
+                st.markdown(f"""
+                <div style="text-align: center;">
+                    <div style="font-size: 0.8rem; color: #666; margin-bottom: 0.5rem;">折扣後總價</div>
+                    <div style="font-size: 1.5rem; font-weight: bold; margin-bottom: 0.5rem;">{format_currency(totals['total_discounted'])}</div>
+                    <div class="discount-text">折扣 {totals['discount_rate']*100:.1f}%</div>
+                </div>
+                """, unsafe_allow_html=True)
+            with col3:
+                st.metric(label="總管理費", value=f"{format_currency(totals['total_management_fee'])}")
+            with col4:
+                st.metric(label="最終總額", value=f"{format_currency(totals['final_total'])}")
+            
+            # 產品明細
+            st.markdown("**產品明細**")
+            product_data = []
+            for detail in totals['product_details']:
+                product_data.append({
+                    '產品類型': '墓園' if any(p['category'] == detail['category'] and p['type'] == 'cemetery' for p in st.session_state.selected_products) else '牌位',
+                    '產品名稱': detail['category'],
+                    '規格': detail['spec'],
+                    '座數': detail['quantity'],
+                    '購買方式': detail['price_type'],
+                    '定價': format_currency(detail['original_price']),
+                    '優惠價': format_currency(detail['product_price']),
+                    '管理費': format_currency(detail['management_fee']),
+                    '分期期數': f"{detail['installment_terms']}期" if detail['installment_terms'] else "無分期",
+                    '優惠價+管理費': format_currency(detail['subtotal'])
+                })
+            
+            df = pd.DataFrame(product_data)
+            st.dataframe(df, use_container_width=True, hide_index=True)
+            
+            # 分期資訊
+            installment_data = {}
+            
+            for product in st.session_state.selected_products:
+                if product['price_type'] == 'installment':
+                    if product['type'] == 'cemetery':
+                        product_data = proposal_system.cemetery_products[product['category']][product['spec']]
+                    else:
+                        product_data = proposal_system.memorial_products[product['category']][product['spec']]
+                    
+                    product_price = product_data['分期價'] * product['quantity']
+                    management_fee = product_data.get('管理費', 0) * product['quantity']
+                    installment_terms = product_data.get('分期期數')
+                    
+                    if installment_terms:
+                        down_payment, monthly_payment = proposal_system.calculate_installment_payment(
+                            product_price, management_fee, installment_terms
+                        )
+                        
+                        # 將分期產品按期數分組
+                        for period in range(1, installment_terms + 1):
+                            if period not in installment_data:
+                                installment_data[period] = 0
+                            installment_data[period] += monthly_payment
+            
+            if installment_data:
+                st.markdown("**分期資訊**")
+                
+                # 計算頭期款總額
+                total_down_payment = 0
+                for product in st.session_state.selected_products:
+                    if product['price_type'] == 'installment':
+                        if product['type'] == 'cemetery':
+                            product_data = proposal_system.cemetery_products[product['category']][product['spec']]
+                        else:
+                            product_data = proposal_system.memorial_products[product['category']][product['spec']]
+                        
+                        product_price = product_data['分期價'] * product['quantity']
+                        management_fee = product_data.get('管理費', 0) * product['quantity']
+                        installment_terms = product_data.get('分期期數')
+                        
+                        if installment_terms:
+                            down_payment, _ = proposal_system.calculate_installment_payment(
+                                product_price, management_fee, installment_terms
+                            )
+                            total_down_payment += down_payment
+                
+                st.markdown(f'<div class="installment-item">頭期款 {format_currency(total_down_payment)}</div>', unsafe_allow_html=True)
+                
+                # 找出所有不同的期數範圍
+                periods = sorted(installment_data.keys())
+                if periods:
+                    max_period = max(periods)
+                    
+                    # 找出期數變化的點
+                    current_amount = installment_data[1]
+                    start_period = 1
+                    
+                    for period in range(2, max_period + 2):  # +2 為了處理最後一組
+                        if period > max_period or installment_data.get(period, current_amount) != current_amount:
+                            if start_period == period - 1:
+                                st.markdown(f'<div class="installment-item">{start_period}期：月繳 {format_currency(current_amount)}</div>', unsafe_allow_html=True)
+                            else:
+                                st.markdown(f'<div class="installment-item">{start_period}~{period-1}期：月繳 {format_currency(current_amount)}</div>', unsafe_allow_html=True)
+                            
+                            if period <= max_period:
+                                start_period = period
+                                current_amount = installment_data[period]
+            
+            # 規劃配置分析
+            st.markdown('<div class="highlight-box">', unsafe_allow_html=True)
+            st.subheader("規劃配置分析")
+            savings = totals['total_original'] - totals['total_discounted']
+            discount_rate = totals['discount_rate'] * 100
+            st.write(f"""
+            **「早規劃、早安心，現在購買最划算」**
+            
+            因應通膨，商品價格將依階段逐步調漲至定價，另外管理費亦會隨商品價格按比例同步調漲。若您現在購買，不僅可提前鎖定目前優惠，立即節省{format_currency(savings)}元 (相當於{discount_rate:.1f}%的折扣)，更能同時享有未來價格上漲的增值潛力，對日後轉售亦具明顯效益。
+            """)
             st.markdown('</div>', unsafe_allow_html=True)
         
-        # 投資價值分析
-        st.markdown('<div class="highlight-box">', unsafe_allow_html=True)
-        st.subheader("投資價值分析")
-        savings = totals['total_original'] - totals['total_discounted']
-        discount_rate = totals['discount_rate'] * 100
-        st.write(f"""
-        **「早規劃、早安心，現在購買最划算」**
-        
-        因應通膨，商品價格將依階段逐步調漲至定價，另外管理費亦會隨商品價格按比例同步調漲。若您現在購買，不僅可提前鎖定目前優惠，立即節省{format_currency(savings)}元 (相當於{discount_rate:.1f}%的折扣)，更能同時享有未來價格上漲的增值潛力，對日後轉售亦具明顯效益。
-        """)
-        st.markdown('</div>', unsafe_allow_html=True)
-    
-    else:
-        st.info("請先選擇產品以查看方案詳情")
-    
-    # 底部信息與晨暉logo
-    st.markdown("---")
-    col_left, col_right = st.columns([2, 1])
-    
-    with col_left:
-        st.write(f"**專業顧問:** {consultant_name} | **聯絡電話:** {contact_phone} | **日期:** {proposal_date.strftime('%Y/%m/%d')}")
-    
-    with col_right:
-        try:
-            morning_logo_url = "https://raw.githubusercontent.com/m9606286/green-garden-app/main/my_app/晨暉logo.png"
-            st.image(morning_logo_url, width=180)  # 放大1.5倍
-        except:
-            st.markdown("""
-            <div style="width: 180px; height: 180px; background: #FF6B35; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 16px; text-align: center;">
-                晨暉資產
-            </div>
-            """, unsafe_allow_html=True)
+        else:
+            st.info("請先在「產品選擇」標籤頁選擇產品")
 
 if __name__ == "__main__":
     main()
