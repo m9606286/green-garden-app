@@ -19,6 +19,7 @@ st.markdown("""
         justify-content: center;
         margin-bottom: 2rem;
         gap: 1rem;
+        position: relative;
     }
     .title-container {
         text-align: center;
@@ -44,14 +45,16 @@ st.markdown("""
         margin: 1rem 0;
     }
     .analysis-title {
-        font-size: 1.1rem;
+        font-size: 1.3rem;
         color: #2E8B57;
         font-weight: bold;
         margin-bottom: 0.5rem;
+        text-align: center;
     }
     .analysis-content {
-        font-size: 0.9rem;
+        font-size: 1rem;
         line-height: 1.4;
+        text-align: center;
     }
     .discount-text {
         color: #FF4444;
@@ -80,6 +83,17 @@ st.markdown("""
         border-radius: 0.5rem;
         margin-bottom: 1rem;
     }
+    .logo-top-right {
+        position: absolute;
+        top: 0;
+        right: 0;
+    }
+    .client-summary {
+        background-color: #f8f9fa;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        margin-top: 2rem;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -92,10 +106,10 @@ class GreenGardenProposal:
     def _init_cemetery_products(self):
         return {
             "澤茵園": {
-                "單人位": {"定價": 460000, "預購-現金價": 276000, "分期價": 292560, "馬上使用-現金價": 552000, "分期期數": 24, "管理費": 100400},
-                "貴族2人": {"定價": 620000, "預購-現金價": 372000, "分期價": 394320, "馬上使用-現金價": 372000, "分期期數": 24, "管理費": 67700},
-                "家福4人": {"定價": 950000, "預購-現金價": 570000, "分期價": 598500, "馬上使用-現金價": 570000, "分期期數": 24, "管理費": 103700},
-                "家族6人": {"定價": 1300000, "預購-現金價": 780000, "分期價": 819000, "馬上使用-現金價": 780000, "分期期數": 24, "管理費": 142000}
+                "單人位": {"定價": 460000, "預購-現金價": 276000, "分期價": 292560, "馬上使用-現金價": 368000, "分期期數": 24, "管理費": 100400},
+                "貴族2人": {"定價": 620000, "預購-現金價": 372000, "分期價": 394320, "馬上使用-現金價": 496000, "分期期數": 24, "管理費": 67700},
+                "家福4人": {"定價": 950000, "預購-現金價": 570000, "分期價": 598500, "馬上使用-現金價": 760000, "分期期數": 24, "管理費": 103700},
+                "家族6人": {"定價": 1300000, "預購-現金價": 780000, "分期價": 819000, "馬上使用-現金價": 1040000, "分期期數": 24, "管理費": 142000}
             },
             "聚賢閣": {
                 "12人": {"定價": 3200000, "預購-現金價": 1888000, "分期價": 1982400, "馬上使用-現金價": 2560000, "分期期數": 42, "管理費": 349000},
@@ -250,35 +264,33 @@ def main():
     </div>
     """, unsafe_allow_html=True)
     
-    st.markdown('</div>', unsafe_allow_html=True)
-
-    # 客戶信息 - 移到主內容區域
-    st.markdown('<div class="client-info">', unsafe_allow_html=True)
-    col1, col2, col3, col4 = st.columns(4)
-    with col1:
-        client_name = st.text_input("客戶姓名", value="")
-    with col2:
-        consultant_name = st.text_input("專業顧問", value="")
-    with col3:
-        contact_phone = st.text_input("聯絡電話", value="")
-    with col4:
-        proposal_date = st.date_input("日期", value=datetime.now())
-    st.markdown('</div>', unsafe_allow_html=True)
-
-    # 初始化提案系統
-    proposal_system = GreenGardenProposal()
-    
-    # 晨暉logo顯示在側邊欄
-    st.sidebar.header("公司資訊")
+    # 晨暉logo放在右上方
     try:
         morning_logo_url = "https://raw.githubusercontent.com/m9606286/green-garden-app/main/my_app/晨暉logo.png"
-        st.sidebar.image(morning_logo_url, width=180)
+        st.markdown(f'<div class="logo-top-right"><img src="{morning_logo_url}" width="120"></div>', unsafe_allow_html=True)
     except:
-        st.sidebar.markdown("""
-        <div style="width: 180px; height: 180px; background: #FF6B35; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 16px; text-align: center;">
+        st.markdown("""
+        <div class="logo-top-right" style="width: 120px; height: 120px; background: #FF6B35; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 16px; text-align: center;">
             晨暉資產
         </div>
         """, unsafe_allow_html=True)
+    
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    # 客戶信息 - 可展開隱藏
+    with st.expander("客戶資訊", expanded=False):
+        col1, col2, col3, col4 = st.columns(4)
+        with col1:
+            client_name = st.text_input("客戶姓名", value="", key="client_name")
+        with col2:
+            consultant_name = st.text_input("專業顧問", value="", key="consultant_name")
+        with col3:
+            contact_phone = st.text_input("聯絡電話", value="", key="contact_phone")
+        with col4:
+            proposal_date = st.date_input("日期", value=datetime.now(), key="proposal_date")
+
+    # 初始化提案系統
+    proposal_system = GreenGardenProposal()
     
     # 初始化 session state
     if 'selected_products' not in st.session_state:
@@ -395,17 +407,18 @@ def main():
             with col1:
                 st.metric(label="總定價", value=f"{format_currency(totals['total_original'])}")
             with col2:
-                # 自定義折扣顯示
+                # 折扣後總價 - 字體放大
                 st.markdown(f"""
                 <div style="text-align: center;">
                     <div style="font-size: 0.8rem; color: #666; margin-bottom: 0.5rem;">折扣後總價</div>
-                    <div style="font-size: 1.5rem; font-weight: bold; margin-bottom: 0.5rem;">{format_currency(totals['total_discounted'])}</div>
+                    <div style="font-size: 1.8rem; font-weight: bold; margin-bottom: 0.5rem; color: #2E8B57;">{format_currency(totals['total_discounted'])}</div>
                     <div class="discount-text">折扣 {totals['discount_rate']*100:.1f}%</div>
                 </div>
                 """, unsafe_allow_html=True)
             with col3:
                 st.metric(label="總管理費", value=f"{format_currency(totals['total_management_fee'])}")
             with col4:
+                # 最終總額改為折扣後總價+總管理費
                 st.metric(label="最終總額", value=f"{format_currency(totals['final_total'])}")
             
             # 產品明細
@@ -495,19 +508,37 @@ def main():
                                 start_period = term
                                 current_amount = payment_schedule[term]
             
-            # 規劃配置分析 - 調整字體大小
+            # 規劃配置分析 - 調整字體和內容
             st.markdown('<div class="analysis-box">', unsafe_allow_html=True)
             st.markdown('<div class="analysis-title">規劃配置分析</div>', unsafe_allow_html=True)
             savings = totals['total_original'] - totals['total_discounted']
             discount_rate = totals['discount_rate'] * 100
             st.markdown(f"""
             <div class="analysis-content">
-            **「早規劃、早安心，現在購買最划算」**
+            **早規劃、早安心，現在購買最划算**
             
             因應通膨，商品價格將依階段逐步調漲至定價，另外管理費亦會隨商品價格按比例同步調漲。若您現在購買，不僅可提前鎖定目前優惠，立即節省{format_currency(savings)}元 (相當於{discount_rate:.1f}%的折扣)，更能同時享有未來價格上漲的增值潛力，對日後轉售亦具明顯效益。
             </div>
             """, unsafe_allow_html=True)
             st.markdown('</div>', unsafe_allow_html=True)
+            
+            # 客戶資訊摘要顯示在建議書最下面
+            if client_name or consultant_name or contact_phone:
+                st.markdown('<div class="client-summary">', unsafe_allow_html=True)
+                st.markdown("**客戶資訊摘要**")
+                col1, col2, col3, col4 = st.columns(4)
+                with col1:
+                    if client_name:
+                        st.write(f"**客戶姓名:** {client_name}")
+                with col2:
+                    if consultant_name:
+                        st.write(f"**專業顧問:** {consultant_name}")
+                with col3:
+                    if contact_phone:
+                        st.write(f"**聯絡電話:** {contact_phone}")
+                with col4:
+                    st.write(f"**日期:** {proposal_date.strftime('%Y-%m-%d')}")
+                st.markdown('</div>', unsafe_allow_html=True)
         
         else:
             st.info("請先在「產品選擇」標籤頁選擇產品")
