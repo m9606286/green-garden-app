@@ -37,12 +37,21 @@ st.markdown("""
         border-bottom: 2px solid #2E8B57;
         padding-bottom: 0.5rem;
     }
-    .highlight-box {
+    .analysis-box {
         background-color: #f0f8f0;
         padding: 1rem;
         border-radius: 0.5rem;
-        border-left: 4px solid #2E8B57;
         margin: 1rem 0;
+    }
+    .analysis-title {
+        font-size: 1.1rem;
+        color: #2E8B57;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+    }
+    .analysis-content {
+        font-size: 0.9rem;
+        line-height: 1.4;
     }
     .discount-text {
         color: #FF4444;
@@ -64,6 +73,12 @@ st.markdown("""
     }
     .dataframe tbody td:first-child {
         text-align: left !important;
+    }
+    .client-info {
+        background-color: #f8f9fa;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        margin-bottom: 1rem;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -182,7 +197,8 @@ class GreenGardenProposal:
             total_discounted += product_price * quantity
             total_management_fee += management_fee
             
-            installment_terms = product_data.get('分期期數')
+            # 只有分期價才顯示分期期數
+            installment_terms = product_data.get('分期期數') if price_type == 'installment' else None
             
             product_details.append({
                 'category': product['category'],
@@ -236,17 +252,24 @@ def main():
     
     st.markdown('</div>', unsafe_allow_html=True)
 
+    # 客戶信息 - 移到主內容區域
+    st.markdown('<div class="client-info">', unsafe_allow_html=True)
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        client_name = st.text_input("客戶姓名", value="")
+    with col2:
+        consultant_name = st.text_input("專業顧問", value="")
+    with col3:
+        contact_phone = st.text_input("聯絡電話", value="")
+    with col4:
+        proposal_date = st.date_input("日期", value=datetime.now())
+    st.markdown('</div>', unsafe_allow_html=True)
+
     # 初始化提案系統
     proposal_system = GreenGardenProposal()
     
-    # 側邊欄 - 客戶信息
-    st.sidebar.header("客戶資訊")
-    client_name = st.sidebar.text_input("客戶姓名", value="")
-    consultant_name = st.sidebar.text_input("專業顧問", value="")
-    contact_phone = st.sidebar.text_input("聯絡電話", value="")
-    proposal_date = st.sidebar.date_input("日期", value=datetime.now())
-    
-    # 晨暉logo顯示在專業顧問上方
+    # 晨暉logo顯示在側邊欄
+    st.sidebar.header("公司資訊")
     try:
         morning_logo_url = "https://raw.githubusercontent.com/m9606286/green-garden-app/main/my_app/晨暉logo.png"
         st.sidebar.image(morning_logo_url, width=180)
@@ -389,6 +412,7 @@ def main():
             st.markdown("**產品明細**")
             product_data = []
             for detail in totals['product_details']:
+                installment_display = f"{detail['installment_terms']}期" if detail['installment_terms'] else "無分期"
                 product_data.append({
                     '產品類型': '墓園' if any(p['category'] == detail['category'] and p['type'] == 'cemetery' for p in st.session_state.selected_products) else '牌位',
                     '產品名稱': detail['category'],
@@ -398,15 +422,15 @@ def main():
                     '定價': format_currency(detail['original_price']),
                     '優惠價': format_currency(detail['product_price']),
                     '管理費': format_currency(detail['management_fee']),
-                    '分期期數': f"{detail['installment_terms']}期" if detail['installment_terms'] else "無分期",
+                    '分期期數': installment_display,
                     '優惠價+管理費': format_currency(detail['subtotal'])
                 })
             
             df = pd.DataFrame(product_data)
             st.dataframe(df, use_container_width=True, hide_index=True)
             
-            # 分期資訊
-            installment_data = {}
+            # 分期資訊 - 修正計算邏輯
+            installment_products = []
             
             for product in st.session_state.selected_products:
                 if product['price_type'] == 'installment':
@@ -424,66 +448,65 @@ def main():
                             product_price, management_fee, installment_terms
                         )
                         
-                        # 將分期產品按期數分組
-                        for period in range(1, installment_terms + 1):
-                            if period not in installment_data:
-                                installment_data[period] = 0
-                            installment_data[period] += monthly_payment
+                        installment_products.append({
+                            'terms': installment_terms,
+                            'monthly_payment': monthly_payment,
+                            'down_payment': down_payment
+                        })
             
-            if installment_data:
+            if installment_products:
                 st.markdown("**分期資訊**")
                 
                 # 計算頭期款總額
-                total_down_payment = 0
-                for product in st.session_state.selected_products:
-                    if product['price_type'] == 'installment':
-                        if product['type'] == 'cemetery':
-                            product_data = proposal_system.cemetery_products[product['category']][product['spec']]
-                        else:
-                            product_data = proposal_system.memorial_products[product['category']][product['spec']]
-                        
-                        product_price = product_data['分期價'] * product['quantity']
-                        management_fee = product_data.get('管理費', 0) * product['quantity']
-                        installment_terms = product_data.get('分期期數')
-                        
-                        if installment_terms:
-                            down_payment, _ = proposal_system.calculate_installment_payment(
-                                product_price, management_fee, installment_terms
-                            )
-                            total_down_payment += down_payment
-                
+                total_down_payment = sum(product['down_payment'] for product in installment_products)
                 st.markdown(f'<div class="installment-item">頭期款 {format_currency(total_down_payment)}</div>', unsafe_allow_html=True)
                 
-                # 找出所有不同的期數範圍
-                periods = sorted(installment_data.keys())
-                if periods:
-                    max_period = max(periods)
+                # 找出所有不同的期數
+                all_terms = sorted(set(product['terms'] for product in installment_products))
+                
+                if all_terms:
+                    # 為每個期數範圍計算月繳總額
+                    payment_schedule = {}
+                    
+                    # 初始化所有期數的月繳金額
+                    max_term = max(all_terms)
+                    for term in range(1, max_term + 1):
+                        payment_schedule[term] = 0
+                    
+                    # 為每個產品添加其月繳金額到相應的期數
+                    for product in installment_products:
+                        terms = product['terms']
+                        monthly_payment = product['monthly_payment']
+                        for term in range(1, terms + 1):
+                            payment_schedule[term] += monthly_payment
                     
                     # 找出期數變化的點
-                    current_amount = installment_data[1]
+                    current_amount = payment_schedule[1]
                     start_period = 1
                     
-                    for period in range(2, max_period + 2):  # +2 為了處理最後一組
-                        if period > max_period or installment_data.get(period, current_amount) != current_amount:
-                            if start_period == period - 1:
+                    for term in range(2, max_term + 2):  # +2 為了處理最後一組
+                        if term > max_term or payment_schedule.get(term, current_amount) != current_amount:
+                            if start_period == term - 1:
                                 st.markdown(f'<div class="installment-item">{start_period}期：月繳 {format_currency(current_amount)}</div>', unsafe_allow_html=True)
                             else:
-                                st.markdown(f'<div class="installment-item">{start_period}~{period-1}期：月繳 {format_currency(current_amount)}</div>', unsafe_allow_html=True)
+                                st.markdown(f'<div class="installment-item">{start_period}~{term-1}期：月繳 {format_currency(current_amount)}</div>', unsafe_allow_html=True)
                             
-                            if period <= max_period:
-                                start_period = period
-                                current_amount = installment_data[period]
+                            if term <= max_term:
+                                start_period = term
+                                current_amount = payment_schedule[term]
             
-            # 規劃配置分析
-            st.markdown('<div class="highlight-box">', unsafe_allow_html=True)
-            st.subheader("規劃配置分析")
+            # 規劃配置分析 - 調整字體大小
+            st.markdown('<div class="analysis-box">', unsafe_allow_html=True)
+            st.markdown('<div class="analysis-title">規劃配置分析</div>', unsafe_allow_html=True)
             savings = totals['total_original'] - totals['total_discounted']
             discount_rate = totals['discount_rate'] * 100
-            st.write(f"""
+            st.markdown(f"""
+            <div class="analysis-content">
             **「早規劃、早安心，現在購買最划算」**
             
             因應通膨，商品價格將依階段逐步調漲至定價，另外管理費亦會隨商品價格按比例同步調漲。若您現在購買，不僅可提前鎖定目前優惠，立即節省{format_currency(savings)}元 (相當於{discount_rate:.1f}%的折扣)，更能同時享有未來價格上漲的增值潛力，對日後轉售亦具明顯效益。
-            """)
+            </div>
+            """, unsafe_allow_html=True)
             st.markdown('</div>', unsafe_allow_html=True)
         
         else:
