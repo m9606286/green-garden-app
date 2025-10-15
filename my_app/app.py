@@ -82,9 +82,6 @@ st.markdown("""
         top: 0;
         right: 0;
     }
-    .sidebar-font {
-        font-size: 0.9rem;
-    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -238,9 +235,9 @@ class GreenGardenProposal:
     def get_down_payment(self, category, spec, price_type, product_price, management_fee):
         """取得頭款金額"""
         try:
-            # 如果是現金購買方式，頭款等於總價（產品價格 + 管理費）
+            # 如果是現金購買方式，頭款等於產品價格（不含管理費）
             if price_type in ['cash', 'immediate_cash', 'additional', 'single']:
-                return product_price + management_fee
+                return product_price
             
             # 如果是分期購買方式，使用預設的頭款金額
             price_type_map = {
@@ -341,7 +338,7 @@ class GreenGardenProposal:
             management_fee_per_unit = product_data.get('管理費', 0)
             management_fee = management_fee_per_unit * quantity
             
-            # 計算產品頭款
+            # 計算產品頭款（不含管理費）
             product_down_payment = self.get_down_payment(
                 product['category'], product['spec'], price_type, product_price, management_fee
             )
@@ -411,7 +408,7 @@ def main():
     # 顯示標題和圖檔 - 修改佈局
     st.markdown('<div class="header-container">', unsafe_allow_html=True)
     
-    # 綠金園圖檔在左方
+    # 綠金園圖檔在左方（對齊"規"字）
     col1, col2, col3 = st.columns([1, 2, 1])
     with col1:
         try:
@@ -431,29 +428,27 @@ def main():
         </div>
         """, unsafe_allow_html=True)
     
-    # 晨暉logo放在最右上方
+    # 晨暉logo放在最右上方，放大1.5倍
     with col3:
         try:
             morning_logo_url = "https://raw.githubusercontent.com/m9606286/green-garden-app/main/my_app/晨暉logo.png"
-            st.image(morning_logo_url, width=120)
+            st.image(morning_logo_url, width=180)  # 從120放大到180
         except:
             st.markdown("""
-            <div style="width: 120px; height: 120px; background: #FF6B35; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 16px; text-align: center;">
+            <div style="width: 180px; height: 180px; background: #FF6B35; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 16px; text-align: center;">
                 晨暉資產
             </div>
             """, unsafe_allow_html=True)
     
     st.markdown('</div>', unsafe_allow_html=True)
 
-    # 客戶信息 - 在左側邊欄
+    # 客戶信息 - 在左側邊欄（移除字體樣式）
     with st.sidebar:
-        st.markdown('<div class="sidebar-font">', unsafe_allow_html=True)
         st.header("客戶資訊")
         client_name = st.text_input("客戶姓名", value="")
         consultant_name = st.text_input("專業顧問", value="")
         contact_phone = st.text_input("聯絡電話", value="")
         proposal_date = st.date_input("日期", value=datetime.now())
-        st.markdown('</div>', unsafe_allow_html=True)
 
     # 初始化提案系統
     proposal_system = GreenGardenProposal()
