@@ -102,6 +102,7 @@ class GreenGardenProposal:
         self.cemetery_products = self._init_cemetery_products()
         self.memorial_products = self._init_memorial_products()
         self.payment_terms = self._init_payment_terms()
+        self.down_payments = self._init_down_payments()
     
     def _init_cemetery_products(self):
         return {
@@ -165,6 +166,185 @@ class GreenGardenProposal:
             "42期": {"頭款比例": 0.2}
         }
     
+    def _init_down_payments(self):
+        """初始化頭款金額"""
+        return {
+            "澤茵園": {
+                "單人位": {
+                    "馬上使用-現金價": 368000,
+                    "預購-現金價": 276000,
+                    "預購-分期價": 88560
+                },
+                "貴族2人": {
+                    "馬上使用-現金價": 496000,
+                    "預購-現金價": 372000,
+                    "預購-分期價": 118320
+                },
+                "家福4人": {
+                    "馬上使用-現金價": 760000,
+                    "預購-現金價": 570000,
+                    "預購-分期價": 180900
+                },
+                "家族6人": {
+                    "馬上使用-現金價": 1040000,
+                    "預購-現金價": 780000,
+                    "預購-分期價": 247800
+                }
+            },
+            "聚賢閣": {
+                "12人": {
+                    "馬上使用-現金價": 2560000,
+                    "預購-現金價": 1888000,
+                    "預購-分期價": 399000
+                },
+                "18人": {
+                    "馬上使用-現金價": 3040000,
+                    "預購-現金價": 2356000,
+                    "預購-分期價": 499800
+                }
+            },
+            "寶祥家族": {
+                "6人": {
+                    "馬上使用-現金價": 1760000,
+                    "預購-現金價": 1166000,
+                    "預購-分期價": 306300
+                },
+                "9人": {
+                    "馬上使用-現金價": 2560000,
+                    "預購-現金價": 1696000,
+                    "預購-分期價": 357000
+                },
+                "15人": {
+                    "馬上使用-現金價": 3200000,
+                    "預購-現金價": 2120000,
+                    "預購-分期價": 420000
+                }
+            },
+            "永願": {
+                "2人": {
+                    "馬上使用-現金價": 336000,
+                    "預購-現金價": 252000,
+                    "預購-分期價": 82560
+                }
+            },
+            "天地": {
+                "合人2人": {
+                    "馬上使用-現金價": 640000,
+                    "預購-現金價": 416000,
+                    "預購-分期價": 133760
+                },
+                "圓融8人": {
+                    "馬上使用-現金價": 1440000,
+                    "預購-現金價": 936000,
+                    "預購-分期價": 296400
+                },
+                "福澤12人": {
+                    "馬上使用-現金價": 2240000,
+                    "預購-現金價": 1456000,
+                    "預購-分期價": 384000
+                }
+            },
+            "恩典園一期": {
+                "安然2人": {
+                    "馬上使用-現金價": 280000,
+                    "預購-現金價": 210000,
+                    "預購-分期價": 68400
+                },
+                "安然4人": {
+                    "馬上使用-現金價": 560000,
+                    "預購-現金價": 406000,
+                    "預購-分期價": 130360
+                },
+                "安然特區4人": {
+                    "馬上使用-現金價": 678400,
+                    "預購-現金價": 614800,
+                    "預購-分期價": 165540
+                },
+                "晨星2人": {
+                    "馬上使用-現金價": 160000,
+                    "預購-現金價": 120000,
+                    "預購-分期價": 38000
+                }
+            },
+            "普羅廳": {
+                "1、2、15、16": {
+                    "加購-現金價": 50000,
+                    "單購-現金價": 66000
+                },
+                "3、5、12、13": {
+                    "加購-現金價": 60000,
+                    "單購-現金價": 77000
+                },
+                "6、7、10、11": {
+                    "加購-現金價": 70000,
+                    "單購-現金價": 88000
+                },
+                "8、9": {
+                    "加購-現金價": 85000,
+                    "單購-現金價": 99000
+                }
+            },
+            "彌陀廳": {
+                "1、2、12、13": {
+                    "加購-現金價": 70000,
+                    "單購-現金價": 88000
+                },
+                "3、5、10、11": {
+                    "加購-現金價": 85000,
+                    "單購-現金價": 99000
+                },
+                "6、9": {
+                    "加購-現金價": 100000,
+                    "單購-現金價": 132000,
+                    "單購-分期價": 42920
+                },
+                "7、8": {
+                    "加購-現金價": 110000,
+                    "單購-現金價": 144000,
+                    "單購-分期價": 46800
+                }
+            },
+            "大佛廳": {
+                "1、2、10、11": {
+                    "加購-現金價": 100000,
+                    "單購-現金價": 132000,
+                    "單購-分期價": 42920
+                },
+                "3、5、8、9": {
+                    "加購-現金價": 120000,
+                    "單購-現金價": 156000,
+                    "單購-分期價": 50680
+                },
+                "6、7": {
+                    "加購-現金價": 135000,
+                    "單購-現金價": 174000,
+                    "單購-分期價": 56500
+                }
+            }
+        }
+    
+    def get_down_payment(self, category, spec, price_type):
+        """取得頭款金額"""
+        try:
+            price_type_map = {
+                'cash': '預購-現金價',
+                'installment': '預購-分期價',
+                'immediate_cash': '馬上使用-現金價',
+                'additional': '加購-現金價',
+                'single': '單購-現金價'
+            }
+            
+            mapped_price_type = price_type_map.get(price_type, price_type)
+            
+            if (category in self.down_payments and 
+                spec in self.down_payments[category] and 
+                mapped_price_type in self.down_payments[category][spec]):
+                return self.down_payments[category][spec][mapped_price_type]
+            else:
+                return 0
+        except:
+            return 0
+    
     def calculate_installment_payment(self, product_price, management_fee, installment_terms):
         if not installment_terms:
             return 0, 0
@@ -182,6 +362,7 @@ class GreenGardenProposal:
         total_original = 0
         total_discounted = 0
         total_management_fee = 0
+        total_down_payment = 0
         product_details = []
         
         for product in selected_products:
@@ -207,6 +388,10 @@ class GreenGardenProposal:
             management_fee_per_unit = product_data.get('管理費', 0)
             management_fee = management_fee_per_unit * quantity
             
+            # 計算頭款
+            down_payment = self.get_down_payment(product['category'], product['spec'], price_type) * quantity
+            total_down_payment += down_payment
+            
             total_original += product_data['定價'] * quantity
             total_discounted += product_price * quantity
             total_management_fee += management_fee
@@ -224,6 +409,7 @@ class GreenGardenProposal:
                 'management_fee_per_unit': management_fee_per_unit,
                 'management_fee': management_fee,
                 'installment_terms': installment_terms,
+                'down_payment': down_payment,
                 'subtotal': product_price * quantity + management_fee
             })
         
@@ -234,6 +420,7 @@ class GreenGardenProposal:
             "total_original": total_original,
             "total_discounted": total_discounted,
             "total_management_fee": total_management_fee,
+            "total_down_payment": total_down_payment,
             "discount_rate": discount_rate,
             "final_total": final_total,
             "product_details": product_details
@@ -277,17 +464,13 @@ def main():
     
     st.markdown('</div>', unsafe_allow_html=True)
 
-    # 客戶信息 - 可展開隱藏
-    with st.expander("客戶資訊", expanded=False):
-        col1, col2, col3, col4 = st.columns(4)
-        with col1:
-            client_name = st.text_input("客戶姓名", value="", key="client_name")
-        with col2:
-            consultant_name = st.text_input("專業顧問", value="", key="consultant_name")
-        with col3:
-            contact_phone = st.text_input("聯絡電話", value="", key="contact_phone")
-        with col4:
-            proposal_date = st.date_input("日期", value=datetime.now(), key="proposal_date")
+    # 客戶信息 - 在左側邊欄
+    with st.sidebar:
+        st.header("客戶資訊")
+        client_name = st.text_input("客戶姓名", value="")
+        consultant_name = st.text_input("專業顧問", value="")
+        contact_phone = st.text_input("聯絡電話", value="")
+        proposal_date = st.date_input("日期", value=datetime.now())
 
     # 初始化提案系統
     proposal_system = GreenGardenProposal()
@@ -436,13 +619,14 @@ def main():
                     '優惠價': format_currency(detail['product_price']),
                     '管理費': format_currency(detail['management_fee']),
                     '分期期數': installment_display,
+                    '頭款': format_currency(detail['down_payment']),
                     '優惠價+管理費': format_currency(detail['subtotal'])
                 })
             
             df = pd.DataFrame(product_data)
             st.dataframe(df, use_container_width=True, hide_index=True)
             
-            # 分期資訊 - 修正計算邏輯
+            # 分期資訊
             installment_products = []
             
             for product in st.session_state.selected_products:
@@ -470,8 +654,8 @@ def main():
             if installment_products:
                 st.markdown("**分期資訊**")
                 
-                # 計算頭期款總額
-                total_down_payment = sum(product['down_payment'] for product in installment_products)
+                # 顯示頭期款總額
+                total_down_payment = totals['total_down_payment']
                 st.markdown(f'<div class="installment-item">頭期款 {format_currency(total_down_payment)}</div>', unsafe_allow_html=True)
                 
                 # 找出所有不同的期數
