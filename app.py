@@ -88,6 +88,16 @@ st.markdown("""
         line-height: 1.4;
         text-align: left;
     }
+    .disclaimer {
+        font-size: 0.9rem;
+        color: #666;
+        text-align: center;
+        margin: 1rem 0;
+        padding: 1rem;
+        background-color: #f8f9fa;
+        border-radius: 0.5rem;
+        border-left: 4px solid #2E8B57;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -368,7 +378,7 @@ class GreenGardenProposal:
             total_management_down_payment += management_down_payment
             
             # 修正：定價要乘座數
-            total_original += product_data['定價']
+            total_original += product_data['定價']* quantity
             total_discounted += product_price
             total_management_fee += management_fee
             
@@ -386,13 +396,13 @@ class GreenGardenProposal:
                 management_monthly_payment = self.calculate_management_installment_payment(
                     management_fee, installment_terms, management_down_payment
                 )
-            
+            current_original_price = product_data['定價'] * quantity
             product_details.append({
                 'category': product['category'],
                 'spec': product['spec'],
                 'quantity': quantity,
                 'price_type': price_key,
-                'original_price': product_data['定價'] ,  # 修正：定價乘座數
+                'original_price': product_data['定價']* quantity ,  # 修正：定價乘座數
                 'product_price': product_price,
                 'management_fee_per_unit': management_fee_per_unit,
                 'management_fee': management_fee,
@@ -727,6 +737,13 @@ def main():
         
         # 基本資訊顯示在建議書最下方
         if client_name or consultant_name or contact_phone:
+            # 添加建議書說明文字
+            st.markdown("""
+            <div class="disclaimer">
+                本建議書提供客戶七日審閱期，建議價格自本建議書日期起七天內有效，實際成交價格仍以公司最新公告為準。
+            </div>
+            """, unsafe_allow_html=True)
+            
             st.markdown('<div class="client-info-footer">', unsafe_allow_html=True)
             col1, col2, col3, col4 = st.columns(4)
             with col1:
