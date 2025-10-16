@@ -433,6 +433,14 @@ def format_currency(amount):
     return f"{amount:,.0f}"
 
 def main():
+     # 客戶信息 - 在左側邊欄
+    with st.sidebar:
+        st.header("個人資訊")
+        client_name = st.text_input("客戶姓名", value="")
+        consultant_name = st.text_input("專業顧問", value="")
+        contact_phone = st.text_input("聯絡電話", value="")
+        proposal_date = st.date_input("日期", value=datetime.now())
+
     # 顯示標題和圖檔 - 修改佈局
     st.markdown('<div class="header-container">', unsafe_allow_html=True)
     
@@ -476,13 +484,7 @@ def main():
     
     st.markdown('</div>', unsafe_allow_html=True)
 
-    # 客戶信息 - 在左側邊欄
-    with st.sidebar:
-        st.header("個人資訊")
-        client_name = st.text_input("客戶姓名", value="")
-        consultant_name = st.text_input("專業顧問", value="")
-        contact_phone = st.text_input("聯絡電話", value="")
-        proposal_date = st.date_input("日期", value=datetime.now())
+   
 
     # 初始化提案系統
     proposal_system = GreenGardenProposal()
