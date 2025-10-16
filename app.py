@@ -737,13 +737,7 @@ def main():
         
         # 基本資訊顯示在建議書最下方
         if client_name or consultant_name or contact_phone:
-            # 添加建議書說明文字
-            st.markdown("""
-            <div class="disclaimer">
-                本建議書提供客戶七日審閱期，建議價格自本建議書日期起七天內有效，實際成交價格仍以公司最新公告為準。
-            </div>
-            """, unsafe_allow_html=True)
-            
+                       
             st.markdown('<div class="client-info-footer">', unsafe_allow_html=True)
             col1, col2, col3, col4 = st.columns(4)
             with col1:
@@ -758,6 +752,13 @@ def main():
             with col4:
                 st.markdown(f'<div class="client-info-content"><strong>日期：</strong>{proposal_date.strftime("%Y-%m-%d")}</div>', unsafe_allow_html=True)
             st.markdown('</div>', unsafe_allow_html=True)
+
+             # 添加建議書說明文字
+            st.markdown("""
+            <div class="disclaimer">
+                本建議書提供客戶七日審閱期，建議價格自本建議書日期起七天內有效，實際成交價格仍以公司最新公告為準。
+            </div>
+            """, unsafe_allow_html=True)
 
 if __name__ == "__main__":
     main()
