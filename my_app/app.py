@@ -451,16 +451,16 @@ def main():
     
     with col2:
     # 動態顯示標題
-    if client_name:
-        page_title = f"{client_name}規劃配置建議書"
-    else:
-        page_title = "規劃配置建議書"
+       if client_name:
+         page_title = f"{client_name}規劃配置建議書"
+       else:
+         page_title = "規劃配置建議書"
     
-    st.markdown(f"""
-    <div class="title-container">
-        <h1 class="main-title">{page_title}</h1>
-    </div>
-    """, unsafe_allow_html=True)
+       st.markdown(f"""
+       <div class="title-container">
+           <h1 class="main-title">{page_title}</h1>
+       </div>
+       """, unsafe_allow_html=True)
     
     # 晨暉logo放在最右上方，放大1.5倍
     with col3:
