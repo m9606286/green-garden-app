@@ -460,7 +460,7 @@ def main():
     with col2:
     # 動態顯示標題
        if client_name:
-         page_title = f"{client_name}規劃配置建議書"
+         page_title = f"客戶{client_name}規劃配置建議書"
        else:
          page_title = "規劃配置建議書"
     
@@ -749,17 +749,15 @@ def main():
         if client_name or consultant_name or contact_phone:
                        
             st.markdown('<div class="client-info-footer">', unsafe_allow_html=True)
-            col1, col2, col3, col4 = st.columns(4)
+            col1, col2, col3 = st.columns(3)
+         
             with col1:
-                if client_name:
-                    st.markdown(f'<div class="client-info-content"><strong>客戶姓名：</strong>{client_name}</div>', unsafe_allow_html=True)
-            with col2:
                 if consultant_name:
                     st.markdown(f'<div class="client-info-content"><strong>專業顧問：</strong>{consultant_name}</div>', unsafe_allow_html=True)
-            with col3:
+            with col2:
                 if contact_phone:
                     st.markdown(f'<div class="client-info-content"><strong>聯絡電話：</strong>{contact_phone}</div>', unsafe_allow_html=True)
-            with col4:
+            with col3:
                 st.markdown(f'<div class="client-info-content"><strong>日期：</strong>{proposal_date.strftime("%Y-%m-%d")}</div>', unsafe_allow_html=True)
             st.markdown('</div>', unsafe_allow_html=True)
 
