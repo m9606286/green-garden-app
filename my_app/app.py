@@ -88,6 +88,16 @@ st.markdown("""
         line-height: 1.4;
         text-align: left;
     }
+    .disclaimer {
+        font-size: 0.9rem;
+        color: #666;
+        text-align: center;
+        margin: 1rem 0;
+        padding: 1rem;
+        background-color: #f8f9fa;
+        border-radius: 0.5rem;
+        border-left: 4px solid #2E8B57;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -718,7 +728,8 @@ def main():
             discount_rate = totals['discount_rate'] * 100
             st.markdown(f"""
             <div class="analysis-content">
-            因應通膨，商品價格將依階段逐步調漲至定價，另外管理費亦會隨商品價格按比例同步調漲。若您現在購買，不僅可提前鎖定目前優惠，立即節省{format_currency(savings)}元 (相當於{discount_rate:.1f}%的折扣)，更能同時享有未來價格上漲的增值潛力，對日後轉售亦具明顯效益。
+            因應通膨，商品價格將依階段逐步調漲至定價，另外管理費亦會隨商品價格按比例同步調漲。若您現在購買，不僅可提前鎖定目前優惠，立即節省{format_currency(savings)}元 (相當於{discount_rate:.1f}%的折扣)，更能同時享有未來價格上漲的增值潛力，對日後轉售亦具明顯效益。本建議書提供客戶七日審閱期，建議價格自本建議書日期起七天內有效，實際成交價格仍以公司最新公告為準。
+            
             </div>
             """, unsafe_allow_html=True)
         
@@ -727,6 +738,7 @@ def main():
         
         # 基本資訊顯示在建議書最下方
         if client_name or consultant_name or contact_phone:
+                       
             st.markdown('<div class="client-info-footer">', unsafe_allow_html=True)
             col1, col2, col3, col4 = st.columns(4)
             with col1:
@@ -742,5 +754,6 @@ def main():
                 st.markdown(f'<div class="client-info-content"><strong>日期：</strong>{proposal_date.strftime("%Y-%m-%d")}</div>', unsafe_allow_html=True)
             st.markdown('</div>', unsafe_allow_html=True)
 
+           
 if __name__ == "__main__":
     main()
