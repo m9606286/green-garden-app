@@ -466,7 +466,7 @@ def main():
     
        st.markdown(f"""
        <div class="title-container">
-           <h1 class="main-title">{page_title}</h1>
+           <h1 class="main-title" style="font-size: 1rem;">{page_title}</h1>
        </div>
        """, unsafe_allow_html=True)
     
