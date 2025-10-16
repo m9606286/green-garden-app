@@ -368,7 +368,7 @@ class GreenGardenProposal:
             total_management_down_payment += management_down_payment
             
             # 修正：定價要乘座數
-            total_original += product_data['定價'] * quantity
+            total_original += product_data['定價']
             total_discounted += product_price
             total_management_fee += management_fee
             
@@ -392,7 +392,7 @@ class GreenGardenProposal:
                 'spec': product['spec'],
                 'quantity': quantity,
                 'price_type': price_key,
-                'original_price': product_data['定價'] * quantity,  # 修正：定價乘座數
+                'original_price': product_data['定價'] ,  # 修正：定價乘座數
                 'product_price': product_price,
                 'management_fee_per_unit': management_fee_per_unit,
                 'management_fee': management_fee,
@@ -644,7 +644,7 @@ def main():
                         product_data = proposal_system.cemetery_products[product['category']][product['spec']]
                     else:
                         product_data = proposal_system.memorial_products[product['category']][product['spec']]
-                    
+                    original_price = product_data['定價'] * product['quantity']
                     product_price = product_data['分期價'] * product['quantity']
                     management_fee = product_data.get('管理費', 0) * product['quantity']
                     installment_terms = product_data.get('分期期數')
