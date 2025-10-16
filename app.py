@@ -72,13 +72,6 @@ st.markdown("""
         border-left: 4px solid #2E8B57;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
-    .client-info-title {
-        font-size: 1.2rem;
-        color: #2E8B57;
-        font-weight: bold;
-        margin-bottom: 1rem;
-        text-align: center;
-    }
     .client-info-content {
         font-size: 1rem;
         line-height: 1.6;
@@ -469,7 +462,7 @@ def main():
 
     # 客戶信息 - 在左側邊欄
     with st.sidebar:
-        st.header("客戶資訊")
+        st.header("個人資訊")
         client_name = st.text_input("客戶姓名", value="")
         consultant_name = st.text_input("專業顧問", value="")
         contact_phone = st.text_input("聯絡電話", value="")
@@ -719,7 +712,7 @@ def main():
                                 start_period = term
                                 current_amount = payment_schedule[term]
             
-            # 規劃配置分析 - 移除淺綠色和灰色框框
+            # 規劃配置分析
             st.markdown('<div class="analysis-title">「早規劃、早安心，現在購買最划算」</div>', unsafe_allow_html=True)
             savings = totals['total_original'] - totals['total_discounted']
             discount_rate = totals['discount_rate'] * 100
@@ -732,10 +725,9 @@ def main():
         else:
             st.info("請先在「產品選擇」標籤頁選擇產品")
         
-        # 客戶資訊顯示在建議書最下方（放在 if st.session_state.selected_products: 區塊之外）
+        # 基本資訊顯示在建議書最下方
         if client_name or consultant_name or contact_phone:
             st.markdown('<div class="client-info-footer">', unsafe_allow_html=True)
-            st.markdown('<div class="client-info-title">客戶資訊</div>', unsafe_allow_html=True)
             col1, col2, col3, col4 = st.columns(4)
             with col1:
                 if client_name:
