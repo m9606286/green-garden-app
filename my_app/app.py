@@ -489,7 +489,7 @@ def main():
     
        st.markdown(f"""
        <div class="title-container">
-           <h1 class="main-title" style="font-size: 2rem;">{page_title}</h1>
+           <h1 class="main-title" style="font-size: 1.5rem;">{page_title}</h1>
        </div>
        """, unsafe_allow_html=True)
     
@@ -634,7 +634,7 @@ def main():
                 # 折扣後總價 - 字體放大並顯示紅色
                 st.markdown(f"""
                  <div style="text-align: left;">
-                    <div style="font-size: 0.8rem; color: #666;">折扣後總價</div>
+                    <div style="font-size: 0.8rem">折扣後總價</div>
                     <div style="font-size: 2rem; font-weight: bold; color: #FF4444;">{format_currency(totals['total_discounted'])}</div>
                     <div style="font-size: 1.5rem; font-weight: bold; color: #FF4444;">折扣 {totals['discount_rate']*100:.0f}%</div>
                 </div>
@@ -773,7 +773,7 @@ def main():
         col1, col2, col3 = st.columns(3)
 
         with col1:
-           st.markdown(f'<div class="client-info-content"><strong> 專業顧問：</strong>{consultant_name if consultant_name else ""}</div>', unsafe_allow_html=True)
+           st.markdown(f'<div class="client-info-content"><strong>專業顧問：</strong>{consultant_name if consultant_name else ""}</div>', unsafe_allow_html=True)
         with col2:
            st.markdown(f'<div class="client-info-content"><strong>聯絡電話：</strong>{contact_phone if contact_phone else ""}</div>', unsafe_allow_html=True)
         with col3:
