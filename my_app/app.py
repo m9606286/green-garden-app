@@ -774,7 +774,7 @@ def main():
         
         # 基本資訊顯示在建議書最下方
         if client_name or consultant_name or contact_phone:
-                       
+            morning_logo_url = "https://raw.githubusercontent.com/m9606286/green-garden-app/main/my_app/晨暉logo.png"           
             st.markdown('<div class="client-info-footer">', unsafe_allow_html=True)
             col1, col2, col3 = st.columns(3)
          
