@@ -645,8 +645,8 @@ def main():
                 # 折扣後總價 - 字體放大並顯示紅色
                 st.markdown(f"""
                  <div style="text-align: left;">
-                    <div style="font-size: 1rem; color: #666; margin-bottom: -1rem;">折扣後總價</div>
-                    <div style="font-size: 2rem; font-weight: bold; margin-bottom: 0rem; color: #FF4444;">{format_currency(totals['total_discounted'])}</div>
+                    <div style="font-size: 1rem; color: #666;">折扣後總價</div>
+                    <div style="font-size: 2rem; font-weight: bold; color: #FF4444;">{format_currency(totals['total_discounted'])}</div>
                     <div style="font-size: 2rem; font-weight: bold; color: #FF4444;">(折扣 {totals['discount_rate']*100:.0f}%)</div>
                 </div>
                 """, unsafe_allow_html=True)
