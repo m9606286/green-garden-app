@@ -67,10 +67,10 @@ st.markdown("""
         top: 0;
         right: 0;
     }
-    .client-info-footer {
-    /* 移除所有樣式，只保留必要的間距 */
-    margin-top: 0rem;
-    }
+    #.client-info-footer {
+    #/* 移除所有樣式，只保留必要的間距 */
+    #margin-top: 0rem;
+    #}
     .client-info-content {
         font-size: 1rem;
         line-height: 1.6;
