@@ -674,7 +674,7 @@ def main():
             simple_df = pd.DataFrame(simple_product_data)
             
             # 使用更緊湊的表格樣式，寬度設為50%
-            st.markdown('<div class="compact-table" style="width:55% !important; margin: 0 auto;">',unsafe_allow_html=True)
+            st.markdown('<div class="compact-table" style="width:30% !important; margin: 0 auto;">',unsafe_allow_html=True)
             st.dataframe(simple_df, use_container_width=True, hide_index=True)
             st.markdown('</div>', unsafe_allow_html=True)
             
