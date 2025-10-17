@@ -646,7 +646,7 @@ def main():
                 st.metric(label="折扣後總價+總管理費", value=f"{format_currency(totals['final_total'])}")
             
             # 產品明細 - 使用更緊湊的表格
-            st.markdown('<div style="margin-bottom: -1rem; font-weight: bold;">產品明細</div>', unsafe_allow_html=True)
+            st.markdown('<div style="margin-bottom: -3rem; font-weight: bold;">產品明細</div>', unsafe_allow_html=True)
             
             # 創建簡化的產品明細表格（移除分期期數欄位）
             simple_product_data = []
