@@ -389,7 +389,7 @@ class GreenGardenProposal:
             )
             total_down_payment += product_down_payment
             
-            # 計算管理費頭款
+            # 計算管理費頭款 - 修正：需要乘以座數
             management_down_payment = self.get_management_down_payment(
                 product['category'], product['spec'], price_type, product_price, management_fee
             )
@@ -408,6 +408,7 @@ class GreenGardenProposal:
             management_monthly_payment = 0
             
             if price_type in ['installment', 'group_installment'] and installment_terms:
+                # 修正：計算期款時要使用正確的產品價格和管理費
                 product_monthly_payment = self.calculate_product_installment_payment(
                     product_price, installment_terms, product_down_payment
                 )
