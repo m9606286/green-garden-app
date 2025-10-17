@@ -647,7 +647,7 @@ def main():
                  <div style="text-align: left;">
                     <div style="font-size: 1rem; color: #666;">折扣後總價</div>
                     <div style="font-size: 2.5rem; font-weight: bold; color: #FF4444;">{format_currency(totals['total_discounted'])}</div>
-                    <div style="font-size: 2.5rem; font-weight: bold; color: #FF4444;">(折扣 {totals['discount_rate']*100:.0f}%)</div>
+                    <div style="font-size: 1.5rem; font-weight: bold; color: #FF4444;">折扣 {totals['discount_rate']*100:.0f}%</div>
                 </div>
                 """, unsafe_allow_html=True)
             with col3:
