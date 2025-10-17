@@ -765,7 +765,8 @@ def main():
             <div class="analysis-content">
             因應通膨，商品價格將依階段逐步調漲至定價，另外管理費亦會隨商品價格按比例同步調漲。若您現在購買，不僅可提前鎖定目前優惠，立即節省{format_currency(savings)}元 (相當於{discount_rate:.0f}%的折扣)，更能同時享有未來價格上漲的增值潛力，對日後轉售亦具明顯效益。
             <br><br>
-            本建議書提供客戶七日審閱期，建議價格自本建議書日期起七天內有效，實際成交價格仍以公司最新公告為準。            
+            本建議書提供客戶七日審閱期，建議價格自本建議書日期起七天內有效，實際成交價格仍以公司最新公告為準。
+            <br><br>            
             </div>
             """, unsafe_allow_html=True)
         
@@ -775,7 +776,7 @@ def main():
         # 基本資訊顯示在建議書最下方
         if client_name or consultant_name or contact_phone:
             morning_logo_url = "https://raw.githubusercontent.com/m9606286/green-garden-app/main/my_app/晨暉logo.png"
-            st.image(morning_logo_url, width=120)           
+            st.image(morning_logo_url, width=180)           
             st.markdown('<div class="client-info-footer">', unsafe_allow_html=True)
             col1, col2, col3 = st.columns(3)
          
