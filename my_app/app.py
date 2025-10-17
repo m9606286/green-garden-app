@@ -642,9 +642,9 @@ def main():
                 # 折扣後總價 - 字體放大並顯示紅色
                 st.markdown(f"""
                  <div style="text-align: left;">
-                    <div style="font-size: 0.5rem; color: #666; margin-bottom: 0rem;">折扣後總價</div>
+                    <div style="font-size: 1rem; color: #666; margin-bottom: 0rem;">折扣後總價</div>
                     <div style="font-size: 3rem; font-weight: bold; margin-bottom: 0rem; color: #FF4444;">{format_currency(totals['total_discounted'])}</div>
-                    <div style="font-size: 3rem; font-weight: bold; color: #FF4444;">(折扣 {totals['discount_rate']*100:.1f}%)</div>
+                    <div style="font-size: 3rem; font-weight: bold; color: #FF4444;">(折扣 {totals['discount_rate']*100:.0f}%)</div>
                 </div>
                 """, unsafe_allow_html=True)
             with col3:
@@ -681,6 +681,7 @@ def main():
                 if detail['installment_terms']:
                     installment_details.append({
                         '產品': f"{detail['category']}\n{detail['spec']}",
+                        '座數': detail['quantity'],  # 新增座數欄位
                         '期數': f"{detail['installment_terms']}期",
                         '產品頭款': format_currency(detail['product_down_payment']),
                         '產品期款': format_currency(detail['product_monthly_payment']),
