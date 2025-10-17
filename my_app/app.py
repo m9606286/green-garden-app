@@ -768,7 +768,8 @@ def main():
         
         # 基本資訊顯示在建議書最下方
         morning_logo_url = "https://raw.githubusercontent.com/m9606286/green-garden-app/main/my_app/晨暉logo.png"
-        st.image(morning_logo_url, width=180)           
+        st.image(morning_logo_url, width=200)   
+        st.markdown('<div style="height: 10px;"></div>', unsafe_allow_html=True)  # 很小的間距        
         st.markdown('<div class="client-info-footer">', unsafe_allow_html=True)
         col1, col2, col3 = st.columns(3)
 
