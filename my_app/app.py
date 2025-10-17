@@ -773,7 +773,7 @@ def main():
         col1, col2, col3 = st.columns(3)
 
         with col1:
-           st.markdown(f'<div class="client-info-content"><strong>專業顧問：</strong>{consultant_name if consultant_name else ""}</div>', unsafe_allow_html=True)
+           st.markdown(f'<div class="client-info-content"><strong> 專業顧問：</strong>{consultant_name if consultant_name else ""}</div>', unsafe_allow_html=True)
         with col2:
            st.markdown(f'<div class="client-info-content"><strong>聯絡電話：</strong>{contact_phone if contact_phone else ""}</div>', unsafe_allow_html=True)
         with col3:
