@@ -105,12 +105,23 @@ st.markdown("""
         font-size: 0.8rem;
     }
     .compact-table th {
-        padding: 4px 8px !important;
-        font-size: 0.75rem;
+        padding: 4px 6px !important;
+        font-size: 0.7rem;
     }
     .compact-table td {
-        padding: 4px 8px !important;
-        font-size: 0.75rem;
+        padding: 4px 6px !important;
+        font-size: 0.7rem;
+    }
+    .extra-compact-table {
+        font-size: 0.7rem;
+    }
+    .extra-compact-table th {
+        padding: 3px 4px !important;
+        font-size: 0.65rem;
+    }
+    .extra-compact-table td {
+        padding: 3px 4px !important;
+        font-size: 0.65rem;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -410,12 +421,18 @@ class GreenGardenProposal:
                 management_monthly_payment = self.calculate_management_installment_payment(
                     management_fee, installment_terms, management_down_payment
                 )
+            
+            # 修改購買方式顯示，如果是分期價就加上期數
+            display_price_type = price_key
+            if price_type in ['installment', 'group_installment'] and installment_terms:
+                display_price_type = f"{price_key}-{installment_terms}期"
+            
             current_original_price = product_data['定價'] * quantity
             product_details.append({
                 'category': product['category'],
                 'spec': product['spec'],
                 'quantity': quantity,
-                'price_type': price_key,
+                'price_type': display_price_type,  # 使用修改後的顯示方式
                 'original_price': product_data['定價']* quantity ,  # 修正：定價乘座數
                 'product_price': product_price,
                 'management_fee_per_unit': management_fee_per_unit,
@@ -646,17 +663,16 @@ def main():
             # 產品明細 - 使用更緊湊的表格
             st.markdown("**產品明細**")
             
-            # 創建簡化的產品明細表格
+            # 創建簡化的產品明細表格（移除分期期數欄位）
             simple_product_data = []
             for detail in totals['product_details']:
                 simple_product_data.append({
                     '產品': f"{detail['category']} {detail['spec']}",
                     '座數': detail['quantity'],
-                    '購買方式': detail['price_type'],
+                    '購買方式': detail['price_type'],  # 這裡已經包含期數資訊
                     '定價': format_currency(detail['original_price']),
                     '優惠價': format_currency(detail['product_price']),
-                    '管理費': format_currency(detail['management_fee']),
-                    '分期期數': f"{detail['installment_terms']}期" if detail['installment_terms'] else "-"
+                    '管理費': format_currency(detail['management_fee'])
                 })
             
             simple_df = pd.DataFrame(simple_product_data)
@@ -671,8 +687,8 @@ def main():
             for detail in totals['product_details']:
                 if detail['installment_terms']:
                     installment_details.append({
-                        '產品': f"{detail['category']} {detail['spec']}",
-                        '分期期數': f"{detail['installment_terms']}期",
+                        '產品': f"{detail['category']}\n{detail['spec']}",
+                        '期數': f"{detail['installment_terms']}期",
                         '產品頭款': format_currency(detail['product_down_payment']),
                         '產品期款': format_currency(detail['product_monthly_payment']),
                         '管理費頭款': format_currency(detail['management_down_payment']),
@@ -682,7 +698,9 @@ def main():
             if installment_details:
                 st.markdown("**分期付款詳情**")
                 installment_df = pd.DataFrame(installment_details)
-                st.markdown('<div class="compact-table">', unsafe_allow_html=True)
+                
+                # 使用超緊湊表格樣式
+                st.markdown('<div class="extra-compact-table">', unsafe_allow_html=True)
                 st.dataframe(installment_df, use_container_width=True, hide_index=True)
                 st.markdown('</div>', unsafe_allow_html=True)
                 
