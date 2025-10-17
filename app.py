@@ -67,14 +67,10 @@ st.markdown("""
         top: 0;
         right: 0;
     }
-    .client-info-footer {
-        background-color: #f8f9fa;
-        padding: 1.5rem;
-        border-radius: 0.5rem;
-        margin-top: 2rem;
-        border-left: 4px solid #2E8B57;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
+    #.client-info-footer {
+    #/* 移除所有樣式，只保留必要的間距 */
+    #margin-top: 0rem;
+    #}
     .client-info-content {
         font-size: 1rem;
         line-height: 1.6;
@@ -498,18 +494,11 @@ def main():
        """, unsafe_allow_html=True)
     
     # 晨暉logo放在最右上方，放大1.5倍
-    with col3:
-        try:
-            morning_logo_url = "https://raw.githubusercontent.com/m9606286/green-garden-app/main/my_app/晨暉logo.png"
-            st.image(morning_logo_url, width=180)  # 從120放大到180
-        except:
-            st.markdown("""
-            <div style="width: 180px; height: 180px; background: #FF6B35; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 16px; text-align: center;">
-                晨暉資產
-            </div>
-            """, unsafe_allow_html=True)
-    
-    st.markdown('</div>', unsafe_allow_html=True)
+    #with col3:
+       # morning_logo_url = "https://raw.githubusercontent.com/m9606286/green-garden-app/main/my_app/晨暉logo.png"
+       # st.image(morning_logo_url, width=180)  # 從120放大到180
+        
+       #st.markdown('</div>', unsafe_allow_html=True)
 
    
 
@@ -645,9 +634,9 @@ def main():
                 # 折扣後總價 - 字體放大並顯示紅色
                 st.markdown(f"""
                  <div style="text-align: left;">
-                    <div style="font-size: 1rem; color: #666; margin-bottom: 0rem;">折扣後總價</div>
-                    <div style="font-size: 2rem; font-weight: bold; margin-bottom: -1rem; color: #FF4444;">{format_currency(totals['total_discounted'])}</div>
-                    <div style="font-size: 2rem; font-weight: bold; color: #FF4444;">(折扣 {totals['discount_rate']*100:.0f}%)</div>
+                    <div style="font-size: 0.8rem; color: #666;">折扣後總價</div>
+                    <div style="font-size: 2rem; font-weight: bold; color: #FF4444;">{format_currency(totals['total_discounted'])}</div>
+                    <div style="font-size: 1.5rem; font-weight: bold; color: #FF4444;">折扣 {totals['discount_rate']*100:.0f}%</div>
                 </div>
                 """, unsafe_allow_html=True)
             with col3:
@@ -769,7 +758,8 @@ def main():
             <div class="analysis-content">
             因應通膨，商品價格將依階段逐步調漲至定價，另外管理費亦會隨商品價格按比例同步調漲。若您現在購買，不僅可提前鎖定目前優惠，立即節省{format_currency(savings)}元 (相當於{discount_rate:.0f}%的折扣)，更能同時享有未來價格上漲的增值潛力，對日後轉售亦具明顯效益。
             <br><br>
-            本建議書提供客戶七日審閱期，建議價格自本建議書日期起七天內有效，實際成交價格仍以公司最新公告為準。            
+            本建議書提供客戶七日審閱期，建議價格自本建議書日期起七天內有效，實際成交價格仍以公司最新公告為準。
+            <br><br>            
             </div>
             """, unsafe_allow_html=True)
         
@@ -777,20 +767,18 @@ def main():
             st.info("請先在「產品選擇」標籤頁選擇產品")
         
         # 基本資訊顯示在建議書最下方
-        if client_name or consultant_name or contact_phone:
-                       
-            st.markdown('<div class="client-info-footer">', unsafe_allow_html=True)
-            col1, col2, col3 = st.columns(3)
-         
-            with col1:
-                if consultant_name:
-                    st.markdown(f'<div class="client-info-content"><strong>專業顧問：</strong>{consultant_name}</div>', unsafe_allow_html=True)
-            with col2:
-                if contact_phone:
-                    st.markdown(f'<div class="client-info-content"><strong>聯絡電話：</strong>{contact_phone}</div>', unsafe_allow_html=True)
-            with col3:
-                st.markdown(f'<div class="client-info-content"><strong>日期：</strong>{proposal_date.strftime("%Y-%m-%d")}</div>', unsafe_allow_html=True)
-            st.markdown('</div>', unsafe_allow_html=True)
+        morning_logo_url = "https://raw.githubusercontent.com/m9606286/green-garden-app/main/my_app/晨暉logo.png"
+        st.image(morning_logo_url, width=180)           
+        st.markdown('<div class="client-info-footer">', unsafe_allow_html=True)
+        col1, col2, col3 = st.columns(3)
+
+        with col1:
+           st.markdown(f'<div class="client-info-content"><strong>專業顧問：</strong>{consultant_name if consultant_name else ""}</div>', unsafe_allow_html=True)
+        with col2:
+           st.markdown(f'<div class="client-info-content"><strong>聯絡電話：</strong>{contact_phone if contact_phone else ""}</div>', unsafe_allow_html=True)
+        with col3:
+           st.markdown(f'<div class="client-info-content"><strong>日期：</strong>{proposal_date.strftime("%Y-%m-%d")}</div>', unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
 
            
 if __name__ == "__main__":
