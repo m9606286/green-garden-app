@@ -691,7 +691,7 @@ def main():
                 st.markdown('</div>', unsafe_allow_html=True)
                 
                 # 分期總結
-                st.markdown('<div style="margin-bottom: -3rem; font-weight: bold;">分期總結</div>', unsafe_allow_html=True)
+                st.markdown('<div style="margin-bottom: -2rem; font-weight: bold;">分期總結</div>', unsafe_allow_html=True)
 
                 
                 # 顯示頭期款總額（新格式）
@@ -768,8 +768,10 @@ def main():
             st.info("請先在「產品選擇」標籤頁選擇產品")
         
         # 基本資訊顯示在建議書最下方
-        morning_logo_url = "https://raw.githubusercontent.com/m9606286/green-garden-app/main/my_app/晨暉logo.png"
-        st.image(morning_logo_url, width=200)     
+        col1, col2 = st.columns([1, 10])  # 左邊1份，右邊10份
+        with col1:
+            morning_logo_url = "https://raw.githubusercontent.com/m9606286/green-garden-app/main/my_app/晨暉logo.png"
+            st.image(morning_logo_url, width=200)     
         #st.markdown('<div class="client-info-footer">', unsafe_allow_html=True)
         col1, col2, col3 = st.columns(3)
 
