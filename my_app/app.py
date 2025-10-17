@@ -682,7 +682,7 @@ def main():
                     })
             
             if installment_details:
-                st.markdown("**產品分期明細**")
+                st.markdown('<div style="margin-bottom: -3rem; font-weight: bold;">產品分期明細</div>', unsafe_allow_html=True)
                 installment_df = pd.DataFrame(installment_details)
                 
                 # 使用緊湊表格樣式，寬度設為50%
@@ -691,7 +691,8 @@ def main():
                 st.markdown('</div>', unsafe_allow_html=True)
                 
                 # 分期總結
-                st.markdown("**分期總結**")
+                st.markdown('<div style="margin-bottom: -3rem; font-weight: bold;">分期總結</div>', unsafe_allow_html=True)
+
                 
                 # 顯示頭期款總額（新格式）
                 total_down_payment = totals['total_down_payment']
