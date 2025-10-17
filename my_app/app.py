@@ -266,14 +266,14 @@ class GreenGardenProposal:
             }
         }
     
-    def get_down_payment(self, category, spec, price_type, product_price, management_fee):
+    def get_down_payment(self, category, spec, price_type, product_price, management_fee, quantity):
         """取得頭款金額"""
         try:
             # 如果是現金購買方式，頭款等於產品價格（不含管理費）
             if price_type in ['cash', 'immediate_cash', 'additional', 'single', 'group_cash']:
                 return product_price
             
-            # 如果是分期購買方式，使用預設的頭款金額
+            # 如果是分期購買方式，使用預設的頭款金額，並乘以座數
             price_type_map = {
                 'installment': '預購-分期價',
                 'single_installment': '單購-分期價',
@@ -285,20 +285,21 @@ class GreenGardenProposal:
             if (category in self.down_payments and 
                 spec in self.down_payments[category] and 
                 mapped_price_type in self.down_payments[category][spec]):
-                return self.down_payments[category][spec][mapped_price_type]
+                # 修正：頭款金額要乘以座數
+                return self.down_payments[category][spec][mapped_price_type] * quantity
             else:
                 return 0
         except:
             return 0
     
-    def get_management_down_payment(self, category, spec, price_type, product_price, management_fee):
+    def get_management_down_payment(self, category, spec, price_type, product_price, management_fee, quantity):
         """取得管理費頭款"""
         try:
             # 如果是現金購買方式，管理費頭款等於總管理費（一次繳清）
             if price_type in ['cash', 'immediate_cash', 'additional', 'single', 'group_cash']:
                 return management_fee
             
-            # 如果是分期購買方式，使用預設的管理費頭款金額
+            # 如果是分期購買方式，使用預設的管理費頭款金額，並乘以座數
             price_type_map = {
                 'installment': '預購-分期價',
                 'single_installment': '單購-分期價',
@@ -310,7 +311,8 @@ class GreenGardenProposal:
             if (category in self.management_down_payments and 
                 spec in self.management_down_payments[category] and 
                 mapped_price_type in self.management_down_payments[category][spec]):
-                return self.management_down_payments[category][spec][mapped_price_type]
+                # 修正：管理費頭款金額要乘以座數
+                return self.management_down_payments[category][spec][mapped_price_type] * quantity
             else:
                 return 0
         except:
@@ -383,15 +385,15 @@ class GreenGardenProposal:
                 
             management_fee = management_fee_per_unit * quantity
             
-            # 計算產品頭款（不含管理費）
+            # 計算產品頭款（不含管理費）- 修正：傳入quantity參數
             product_down_payment = self.get_down_payment(
-                product['category'], product['spec'], price_type, product_price, management_fee
+                product['category'], product['spec'], price_type, product_price, management_fee, quantity
             )
             total_down_payment += product_down_payment
             
-            # 計算管理費頭款 - 修正：需要乘以座數
+            # 計算管理費頭款 - 修正：傳入quantity參數
             management_down_payment = self.get_management_down_payment(
-                product['category'], product['spec'], price_type, product_price, management_fee
+                product['category'], product['spec'], price_type, product_price, management_fee, quantity
             )
             total_management_down_payment += management_down_payment
             
