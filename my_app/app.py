@@ -645,9 +645,9 @@ def main():
                 # 折扣後總價 - 字體放大並顯示紅色
                 st.markdown(f"""
                  <div style="text-align: left;">
-                    <div style="font-size: 1rem; color: #666; margin-bottom: 0rem;">折扣後總價</div>
-                    <div style="font-size: 3rem; font-weight: bold; margin-bottom: 0rem; color: #FF4444;">{format_currency(totals['total_discounted'])}</div>
-                    <div style="font-size: 3rem; font-weight: bold; color: #FF4444;">(折扣 {totals['discount_rate']*100:.0f}%)</div>
+                    <div style="font-size: 1rem; color: #666; margin-bottom: -1rem;">折扣後總價</div>
+                    <div style="font-size: 2rem; font-weight: bold; margin-bottom: 0rem; color: #FF4444;">{format_currency(totals['total_discounted'])}</div>
+                    <div style="font-size: 2rem; font-weight: bold; color: #FF4444;">(折扣 {totals['discount_rate']*100:.0f}%)</div>
                 </div>
                 """, unsafe_allow_html=True)
             with col3:
@@ -767,7 +767,7 @@ def main():
             discount_rate = totals['discount_rate'] * 100
             st.markdown(f"""
             <div class="analysis-content">
-            因應通膨，商品價格將依階段逐步調漲至定價，另外管理費亦會隨商品價格按比例同步調漲。若您現在購買，不僅可提前鎖定目前優惠，立即節省{format_currency(savings)}元 (相當於{discount_rate:.1f}%的折扣)，更能同時享有未來價格上漲的增值潛力，對日後轉售亦具明顯效益。
+            因應通膨，商品價格將依階段逐步調漲至定價，另外管理費亦會隨商品價格按比例同步調漲。若您現在購買，不僅可提前鎖定目前優惠，立即節省{format_currency(savings)}元 (相當於{discount_rate:.0f}%的折扣)，更能同時享有未來價格上漲的增值潛力，對日後轉售亦具明顯效益。
             <br><br>
             本建議書提供客戶七日審閱期，建議價格自本建議書日期起七天內有效，實際成交價格仍以公司最新公告為準。            
             </div>
