@@ -641,10 +641,10 @@ def main():
             with col2:
                 # 折扣後總價 - 字體放大並顯示紅色
                 st.markdown(f"""
-                <div style="text-align: center;">
-                    <div style="font-size: 0.8rem; color: #666; margin-bottom: 0.5rem;">折扣後總價</div>
-                    <div style="font-size: 1.8rem; font-weight: bold; margin-bottom: 0.5rem; color: #FF4444;">{format_currency(totals['total_discounted'])}</div>
-                    <div style="font-size: 1.8rem; font-weight: bold; color: #FF4444;">折扣 {totals['discount_rate']*100:.1f}%</div>
+                <div style="text-align: right;">
+                    <div style="font-size: 1rem; color: #666; margin-bottom: 0.2rem;">折扣後總價</div>
+                    <div style="font-size: 2rem; font-weight: bold; margin-bottom: 0.2rem; color: #FF4444;">{format_currency(totals['total_discounted'])}</div>
+                    <div style="font-size: 2rem; font-weight: bold; color: #FF4444;">(折扣 {totals['discount_rate']*100:.1f}%)</div>
                 </div>
                 """, unsafe_allow_html=True)
             with col3:
@@ -743,8 +743,6 @@ def main():
                     current_product = product_payment_schedule[1]
                     current_management = management_payment_schedule[1]
                     start_period = 1
-                    
-                    st.markdown('<div class="installment-item">月繳(含管理費)</div>', unsafe_allow_html=True)
                     
                     for term in range(2, max_term + 2):  # +2 為了處理最後一組
                         if term > max_term or (payment_schedule.get(term, current_total) != current_total):
