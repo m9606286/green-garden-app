@@ -102,26 +102,19 @@ st.markdown("""
         border-left: 4px solid #2E8B57;
     }
     .compact-table {
-        font-size: 0.8rem;
+        font-size: 0.7rem;
     }
     .compact-table th {
-        padding: 4px 6px !important;
-        font-size: 0.7rem;
+        padding: 3px 4px !important;
+        font-size: 0.65rem;
     }
     .compact-table td {
-        padding: 4px 6px !important;
-        font-size: 0.7rem;
-    }
-    .extra-compact-table {
-        font-size: 0.7rem;
-    }
-    .extra-compact-table th {
         padding: 3px 4px !important;
         font-size: 0.65rem;
     }
-    .extra-compact-table td {
-        padding: 3px 4px !important;
-        font-size: 0.65rem;
+    .half-width-table {
+        width: 50% !important;
+        margin: 0 auto;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -677,12 +670,12 @@ def main():
             
             simple_df = pd.DataFrame(simple_product_data)
             
-            # 使用更緊湊的表格樣式
-            st.markdown('<div class="compact-table">', unsafe_allow_html=True)
-            st.dataframe(simple_df, use_container_width=True, hide_index=True)
+            # 使用更緊湊的表格樣式，寬度設為50%
+            st.markdown('<div class="compact-table half-width-table">', unsafe_allow_html=True)
+            st.dataframe(simple_df, use_container_width=False, hide_index=True)
             st.markdown('</div>', unsafe_allow_html=True)
             
-            # 分期付款詳情（如果有分期產品）
+            # 產品分期明細（如果有分期產品）
             installment_details = []
             for detail in totals['product_details']:
                 if detail['installment_terms']:
@@ -696,32 +689,75 @@ def main():
                     })
             
             if installment_details:
-                st.markdown("**分期付款詳情**")
+                st.markdown("**產品分期明細**")
                 installment_df = pd.DataFrame(installment_details)
                 
-                # 使用超緊湊表格樣式
-                st.markdown('<div class="extra-compact-table">', unsafe_allow_html=True)
-                st.dataframe(installment_df, use_container_width=True, hide_index=True)
+                # 使用緊湊表格樣式，寬度設為50%
+                st.markdown('<div class="compact-table half-width-table">', unsafe_allow_html=True)
+                st.dataframe(installment_df, use_container_width=False, hide_index=True)
                 st.markdown('</div>', unsafe_allow_html=True)
                 
-                # 分期資訊總結
-                st.markdown("**分期資訊總結**")
+                # 分期總結
+                st.markdown("**分期總結**")
                 
-                # 顯示頭期款總額
+                # 顯示頭期款總額（新格式）
                 total_down_payment = totals['total_down_payment']
                 total_management_down_payment = totals['total_management_down_payment']
-                st.markdown(f'<div class="installment-item">產品頭款總計：{format_currency(total_down_payment)}</div>', unsafe_allow_html=True)
-                st.markdown(f'<div class="installment-item">管理費頭款總計：{format_currency(total_management_down_payment)}</div>', unsafe_allow_html=True)
-                st.markdown(f'<div class="installment-item">總頭期款：{format_currency(total_down_payment + total_management_down_payment)}</div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="installment-item">頭期款：{format_currency(total_down_payment + total_management_down_payment)} (產品 {format_currency(total_down_payment)}、管理費 {format_currency(total_management_down_payment)})</div>', unsafe_allow_html=True)
                 
-                # 計算月繳總額
-                monthly_total = 0
+                # 計算月繳總額（含管理費）並按不同期數顯示，包含產品和管理費明細
+                payment_schedule = {}
+                product_payment_schedule = {}
+                management_payment_schedule = {}
+                
+                # 找出所有不同的期數
+                all_terms = []
                 for detail in totals['product_details']:
                     if detail['installment_terms']:
-                        monthly_total += detail['product_monthly_payment'] + detail['management_monthly_payment']
+                        all_terms.append(detail['installment_terms'])
                 
-                if monthly_total > 0:
-                    st.markdown(f'<div class="installment-item">月繳總額：{format_currency(monthly_total)}</div>', unsafe_allow_html=True)
+                if all_terms:
+                    max_term = max(all_terms)
+                    
+                    # 初始化所有期數的月繳金額
+                    for term in range(1, max_term + 1):
+                        payment_schedule[term] = 0
+                        product_payment_schedule[term] = 0
+                        management_payment_schedule[term] = 0
+                    
+                    # 為每個產品添加其月繳金額到相應的期數
+                    for detail in totals['product_details']:
+                        if detail['installment_terms']:
+                            terms = detail['installment_terms']
+                            product_monthly = detail['product_monthly_payment']
+                            management_monthly = detail['management_monthly_payment']
+                            total_monthly = product_monthly + management_monthly
+                            
+                            for term in range(1, terms + 1):
+                                payment_schedule[term] += total_monthly
+                                product_payment_schedule[term] += product_monthly
+                                management_payment_schedule[term] += management_monthly
+                    
+                    # 找出期數變化的點
+                    current_total = payment_schedule[1]
+                    current_product = product_payment_schedule[1]
+                    current_management = management_payment_schedule[1]
+                    start_period = 1
+                    
+                    st.markdown('<div class="installment-item">月繳(含管理費)</div>', unsafe_allow_html=True)
+                    
+                    for term in range(2, max_term + 2):  # +2 為了處理最後一組
+                        if term > max_term or (payment_schedule.get(term, current_total) != current_total):
+                            if start_period == term - 1:
+                                st.markdown(f'<div class="installment-item">第{start_period}期：每期 {format_currency(current_total)} (產品{format_currency(current_product)}、管理費 {format_currency(current_management)})</div>', unsafe_allow_html=True)
+                            else:
+                                st.markdown(f'<div class="installment-item">第{start_period}~{term-1}期：每期 {format_currency(current_total)} (產品{format_currency(current_product)}、管理費 {format_currency(current_management)})</div>', unsafe_allow_html=True)
+                            
+                            if term <= max_term:
+                                start_period = term
+                                current_total = payment_schedule[term]
+                                current_product = product_payment_schedule[term]
+                                current_management = management_payment_schedule[term]
             
             # 規劃配置分析
             st.markdown('<div class="analysis-title">「早規劃、早安心，現在購買最划算」</div>', unsafe_allow_html=True)
