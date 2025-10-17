@@ -483,7 +483,7 @@ def main():
     with col2:
     # 動態顯示標題
        if client_name:
-         page_title = f"客戶{client_name}規劃配置建議書"
+         page_title = f"客戶{client_name}-規劃配置建議書"
        else:
          page_title = "規劃配置建議書"
     
@@ -646,7 +646,7 @@ def main():
                 st.metric(label="折扣後總價+總管理費", value=f"{format_currency(totals['final_total'])}")
             
             # 產品明細 - 使用更緊湊的表格
-            st.markdown("**產品明細**")
+            st.markdown('<div style="margin-bottom: 0.5rem;">**產品明細**</div>', unsafe_allow_html=True)
             
             # 創建簡化的產品明細表格（移除分期期數欄位）
             simple_product_data = []
@@ -682,7 +682,7 @@ def main():
                     })
             
             if installment_details:
-                st.markdown("**產品分期明細**")
+                st.markdown('<div style="margin-bottom: 0.5rem;">**產品分期明細**</div>', unsafe_allow_html=True)
                 installment_df = pd.DataFrame(installment_details)
                 
                 # 使用緊湊表格樣式，寬度設為50%
