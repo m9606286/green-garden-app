@@ -646,8 +646,8 @@ def main():
                 st.markdown(f"""
                  <div style="text-align: left;">
                     <div style="font-size: 1rem; color: #666;">折扣後總價</div>
-                    <div style="font-size: 2rem; font-weight: bold; color: #FF4444;">{format_currency(totals['total_discounted'])}</div>
-                    <div style="font-size: 2rem; font-weight: bold; color: #FF4444;">(折扣 {totals['discount_rate']*100:.0f}%)</div>
+                    <div style="font-size: 2.5rem; font-weight: bold; color: #FF4444;">{format_currency(totals['total_discounted'])}</div>
+                    <div style="font-size: 2.5rem; font-weight: bold; color: #FF4444;">(折扣 {totals['discount_rate']*100:.0f}%)</div>
                 </div>
                 """, unsafe_allow_html=True)
             with col3:
@@ -674,7 +674,7 @@ def main():
             simple_df = pd.DataFrame(simple_product_data)
             
             # 使用更緊湊的表格樣式，寬度設為50%
-            st.markdown('<div class="compact-table half-width-table">', unsafe_allow_html=True)
+            st.markdown('<div class="compact-table" style="width:65% !important; margin: 0 auto;">',unsafe_allow_html=True)
             st.dataframe(simple_df, use_container_width=False, hide_index=True)
             st.markdown('</div>', unsafe_allow_html=True)
             
