@@ -768,7 +768,7 @@ def main():
             st.info("請先在「產品選擇」標籤頁選擇產品")
         
         # 基本資訊顯示在建議書最下方
-        col1, col2 = st.columns([1, 10])  # 左邊1份，右邊10份
+        col1, col2 = st.columns([1, 4])  # 左邊1份，右邊10份
         with col1:
             morning_logo_url = "https://raw.githubusercontent.com/m9606286/green-garden-app/main/my_app/晨暉logo.png"
             st.image(morning_logo_url, width=200)     
