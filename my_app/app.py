@@ -52,9 +52,12 @@ st.markdown("""
     }
     .dataframe thead th {
         text-align: center !important;
+        font-size: 0.9rem;
+        white-space: nowrap;
     }
     .dataframe tbody td {
         text-align: right !important;
+        font-size: 0.85rem;
     }
     .dataframe tbody td:first-child {
         text-align: left !important;
@@ -97,6 +100,17 @@ st.markdown("""
         background-color: #f8f9fa;
         border-radius: 0.5rem;
         border-left: 4px solid #2E8B57;
+    }
+    .compact-table {
+        font-size: 0.8rem;
+    }
+    .compact-table th {
+        padding: 4px 8px !important;
+        font-size: 0.75rem;
+    }
+    .compact-table td {
+        padding: 4px 8px !important;
+        font-size: 0.75rem;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -629,106 +643,67 @@ def main():
                 # 最終總額改為折扣後總價+總管理費
                 st.metric(label="折扣後總價+總管理費", value=f"{format_currency(totals['final_total'])}")
             
-            # 產品明細
+            # 產品明細 - 使用更緊湊的表格
             st.markdown("**產品明細**")
-            product_data = []
+            
+            # 創建簡化的產品明細表格
+            simple_product_data = []
             for detail in totals['product_details']:
-                installment_display = f"{detail['installment_terms']}期" if detail['installment_terms'] else "無分期"
-                product_data.append({
-                    '產品類型': '墓園' if any(p['category'] == detail['category'] and p['type'] == 'cemetery' for p in st.session_state.selected_products) else '牌位',
-                    '產品名稱': detail['category'],
-                    '規格': detail['spec'],
+                simple_product_data.append({
+                    '產品': f"{detail['category']} {detail['spec']}",
                     '座數': detail['quantity'],
                     '購買方式': detail['price_type'],
                     '定價': format_currency(detail['original_price']),
                     '優惠價': format_currency(detail['product_price']),
                     '管理費': format_currency(detail['management_fee']),
-                    '分期期數': installment_display,
-                    '產品頭款': format_currency(detail['product_down_payment']),
-                    '產品期款': format_currency(detail['product_monthly_payment']),
-                    '管理費頭款': format_currency(detail['management_down_payment']),
-                    '管理費期款': format_currency(detail['management_monthly_payment'])
+                    '分期期數': f"{detail['installment_terms']}期" if detail['installment_terms'] else "-"
                 })
             
-            df = pd.DataFrame(product_data)
-            st.dataframe(df, use_container_width=True, hide_index=True)
+            simple_df = pd.DataFrame(simple_product_data)
             
-            # 分期資訊
-            installment_products = []
+            # 使用更緊湊的表格樣式
+            st.markdown('<div class="compact-table">', unsafe_allow_html=True)
+            st.dataframe(simple_df, use_container_width=True, hide_index=True)
+            st.markdown('</div>', unsafe_allow_html=True)
             
-            for product in st.session_state.selected_products:
-                if product['price_type'] in ['installment', 'group_installment']:
-                    if product['type'] == 'cemetery':
-                        product_data = proposal_system.cemetery_products[product['category']][product['spec']]
-                    else:
-                        product_data = proposal_system.memorial_products[product['category']][product['spec']]
-                    original_price = product_data['定價'] * product['quantity']
-                    product_price = product_data['分期價'] * product['quantity']
-                    management_fee = product_data.get('管理費', 0) * product['quantity']
-                    installment_terms = product_data.get('分期期數')
-                    
-                    if installment_terms:
-                        down_payment = proposal_system.get_down_payment(
-                            product['category'], product['spec'], product['price_type'], product_price, management_fee
-                        )
-                        management_down_payment = proposal_system.get_management_down_payment(
-                            product['category'], product['spec'], product['price_type'], product_price, management_fee
-                        )
-                        
-                        monthly_payment = proposal_system.calculate_installment_payment(
-                            product_price, management_fee, installment_terms, down_payment, management_down_payment
-                        )
-                        
-                        installment_products.append({
-                            'terms': installment_terms,
-                            'monthly_payment': monthly_payment,
-                            'down_payment': down_payment,
-                            'management_down_payment': management_down_payment
-                        })
+            # 分期付款詳情（如果有分期產品）
+            installment_details = []
+            for detail in totals['product_details']:
+                if detail['installment_terms']:
+                    installment_details.append({
+                        '產品': f"{detail['category']} {detail['spec']}",
+                        '分期期數': f"{detail['installment_terms']}期",
+                        '產品頭款': format_currency(detail['product_down_payment']),
+                        '產品期款': format_currency(detail['product_monthly_payment']),
+                        '管理費頭款': format_currency(detail['management_down_payment']),
+                        '管理費期款': format_currency(detail['management_monthly_payment'])
+                    })
             
-            if installment_products:
-                st.markdown("**分期資訊**")
+            if installment_details:
+                st.markdown("**分期付款詳情**")
+                installment_df = pd.DataFrame(installment_details)
+                st.markdown('<div class="compact-table">', unsafe_allow_html=True)
+                st.dataframe(installment_df, use_container_width=True, hide_index=True)
+                st.markdown('</div>', unsafe_allow_html=True)
+                
+                # 分期資訊總結
+                st.markdown("**分期資訊總結**")
                 
                 # 顯示頭期款總額
                 total_down_payment = totals['total_down_payment']
                 total_management_down_payment = totals['total_management_down_payment']
-                st.markdown(f'<div class="installment-item">產品頭款 {format_currency(total_down_payment)}</div>', unsafe_allow_html=True)
-                st.markdown(f'<div class="installment-item">管理費頭款 {format_currency(total_management_down_payment)}</div>', unsafe_allow_html=True)
-                st.markdown(f'<div class="installment-item">總頭期款 {format_currency(total_down_payment + total_management_down_payment)}</div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="installment-item">產品頭款總計：{format_currency(total_down_payment)}</div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="installment-item">管理費頭款總計：{format_currency(total_management_down_payment)}</div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="installment-item">總頭期款：{format_currency(total_down_payment + total_management_down_payment)}</div>', unsafe_allow_html=True)
                 
-                # 找出所有不同的期數
-                all_terms = sorted(set(product['terms'] for product in installment_products))
+                # 計算月繳總額
+                monthly_total = 0
+                for detail in totals['product_details']:
+                    if detail['installment_terms']:
+                        monthly_total += detail['product_monthly_payment'] + detail['management_monthly_payment']
                 
-                if all_terms:
-                    # 為每個期數範圍計算月繳總額
-                    payment_schedule = {}
-                    
-                    # 初始化所有期數的月繳金額
-                    max_term = max(all_terms)
-                    for term in range(1, max_term + 1):
-                        payment_schedule[term] = 0
-                    
-                    # 為每個產品添加其月繳金額到相應的期數
-                    for product in installment_products:
-                        terms = product['terms']
-                        monthly_payment = product['monthly_payment']
-                        for term in range(1, terms + 1):
-                            payment_schedule[term] += monthly_payment
-                    
-                    # 找出期數變化的點
-                    current_amount = payment_schedule[1]
-                    start_period = 1
-                    
-                    for term in range(2, max_term + 2):  # +2 為了處理最後一組
-                        if term > max_term or payment_schedule.get(term, current_amount) != current_amount:
-                            if start_period == term - 1:
-                                st.markdown(f'<div class="installment-item">{start_period}期：月繳(含管理費) {format_currency(current_amount)}</div>', unsafe_allow_html=True)
-                            else:
-                                st.markdown(f'<div class="installment-item">{start_period}~{term-1}期：月繳(含管理費) {format_currency(current_amount)}</div>', unsafe_allow_html=True)
-                            
-                            if term <= max_term:
-                                start_period = term
-                                current_amount = payment_schedule[term]
+                if monthly_total > 0:
+                    st.markdown(f'<div class="installment-item">月繳總額：{format_currency(monthly_total)}</div>', unsafe_allow_html=True)
             
             # 規劃配置分析
             st.markdown('<div class="analysis-title">「早規劃、早安心，現在購買最划算」</div>', unsafe_allow_html=True)
