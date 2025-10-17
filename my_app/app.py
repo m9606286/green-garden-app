@@ -767,21 +767,18 @@ def main():
             st.info("請先在「產品選擇」標籤頁選擇產品")
         
         # 基本資訊顯示在建議書最下方
-        if client_name or consultant_name or contact_phone:
-            morning_logo_url = "https://raw.githubusercontent.com/m9606286/green-garden-app/main/my_app/晨暉logo.png"
-            st.image(morning_logo_url, width=180)           
-            st.markdown('<div class="client-info-footer">', unsafe_allow_html=True)
-            col1, col2, col3 = st.columns(3)
-         
-            with col1:
-                if consultant_name:
-                    st.markdown(f'<div class="client-info-content"><strong>專業顧問：</strong>{consultant_name}</div>', unsafe_allow_html=True)
-            with col2:
-                if contact_phone:
-                    st.markdown(f'<div class="client-info-content"><strong>聯絡電話：</strong>{contact_phone}</div>', unsafe_allow_html=True)
-            with col3:
-                st.markdown(f'<div class="client-info-content"><strong>日期：</strong>{proposal_date.strftime("%Y-%m-%d")}</div>', unsafe_allow_html=True)
-            st.markdown('</div>', unsafe_allow_html=True)
+        morning_logo_url = "https://raw.githubusercontent.com/m9606286/green-garden-app/main/my_app/晨暉logo.png"
+        st.image(morning_logo_url, width=180)           
+        st.markdown('<div class="client-info-footer">', unsafe_allow_html=True)
+        col1, col2, col3 = st.columns(3)
+
+        with col1:
+           st.markdown(f'<div class="client-info-content"><strong>專業顧問：</strong>{consultant_name if consultant_name else ""}</div>', unsafe_allow_html=True)
+        with col2:
+           st.markdown(f'<div class="client-info-content"><strong>聯絡電話：</strong>{contact_phone if contact_phone else ""}</div>', unsafe_allow_html=True)
+        with col3:
+           st.markdown(f'<div class="client-info-content"><strong>日期：</strong>{proposal_date.strftime("%Y-%m-%d")}</div>', unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
 
            
 if __name__ == "__main__":
