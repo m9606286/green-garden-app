@@ -483,13 +483,13 @@ def main():
     with col2:
     # 動態顯示標題
        if client_name:
-         page_title = f"客戶{client_name}規劃配置建議書"
+         page_title = f"客戶{client_name}-規劃配置建議書"
        else:
          page_title = "規劃配置建議書"
     
        st.markdown(f"""
        <div class="title-container">
-           <h1 class="main-title" style="font-size: 2rem;">{page_title}</h1>
+           <h1 class="main-title" style="font-size: 1.5rem;">{page_title}</h1>
        </div>
        """, unsafe_allow_html=True)
     
@@ -634,8 +634,8 @@ def main():
                 # 折扣後總價 - 字體放大並顯示紅色
                 st.markdown(f"""
                  <div style="text-align: left;">
-                    <div style="font-size: 0.8rem; color: #666;">折扣後總價</div>
-                    <div style="font-size: 2rem; font-weight: bold; color: #FF4444;">{format_currency(totals['total_discounted'])}</div>
+                    <div style="font-size: 1rem">折扣後總價</div>
+                    <div style="font-size: 2.3rem; font-weight: bold; color: #FF4444;">{format_currency(totals['total_discounted'])}</div>
                     <div style="font-size: 1.5rem; font-weight: bold; color: #FF4444;">折扣 {totals['discount_rate']*100:.0f}%</div>
                 </div>
                 """, unsafe_allow_html=True)
@@ -646,7 +646,7 @@ def main():
                 st.metric(label="折扣後總價+總管理費", value=f"{format_currency(totals['final_total'])}")
             
             # 產品明細 - 使用更緊湊的表格
-            st.markdown("**產品明細**")
+            st.markdown('<div style="margin-bottom: 0rem;">**產品明細**</div>', unsafe_allow_html=True)
             
             # 創建簡化的產品明細表格（移除分期期數欄位）
             simple_product_data = []
@@ -768,8 +768,8 @@ def main():
         
         # 基本資訊顯示在建議書最下方
         morning_logo_url = "https://raw.githubusercontent.com/m9606286/green-garden-app/main/my_app/晨暉logo.png"
-        st.image(morning_logo_url, width=180)           
-        st.markdown('<div class="client-info-footer">', unsafe_allow_html=True)
+        st.image(morning_logo_url, width=200)     
+        #st.markdown('<div class="client-info-footer">', unsafe_allow_html=True)
         col1, col2, col3 = st.columns(3)
 
         with col1:
