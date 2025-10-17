@@ -494,18 +494,11 @@ def main():
        """, unsafe_allow_html=True)
     
     # 晨暉logo放在最右上方，放大1.5倍
-    with col3:
-        try:
-            morning_logo_url = "https://raw.githubusercontent.com/m9606286/green-garden-app/main/my_app/晨暉logo.png"
-            st.image(morning_logo_url, width=180)  # 從120放大到180
-        except:
-            st.markdown("""
-            <div style="width: 180px; height: 180px; background: #FF6B35; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 16px; text-align: center;">
-                晨暉資產
-            </div>
-            """, unsafe_allow_html=True)
-    
-    st.markdown('</div>', unsafe_allow_html=True)
+    #with col3:
+       # morning_logo_url = "https://raw.githubusercontent.com/m9606286/green-garden-app/main/my_app/晨暉logo.png"
+       # st.image(morning_logo_url, width=180)  # 從120放大到180
+        
+       #st.markdown('</div>', unsafe_allow_html=True)
 
    
 
