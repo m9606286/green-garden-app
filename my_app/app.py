@@ -68,12 +68,8 @@ st.markdown("""
         right: 0;
     }
     .client-info-footer {
-        background-color: #f8f9fa;
-        padding: 1.5rem;
-        border-radius: 0.5rem;
-        margin-top: 2rem;
-        border-left: 4px solid #2E8B57;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    /* 移除所有樣式，只保留必要的間距 */
+    margin-top: 0rem;
     }
     .client-info-content {
         font-size: 1rem;
