@@ -510,7 +510,7 @@ def main():
         st.session_state.selected_products = []
     
     # 主內容區域 - 兩個標籤頁
-    tab1, tab2 = st.tabs(["📋 產品選擇", "📊 方案詳情"])
+    tab1, tab2 = st.tabs(["🛒 產品選擇", "📋 方案詳情"])
     
     with tab1:
         st.markdown('<div class="section-header">產品選擇</div>', unsafe_allow_html=True)
