@@ -273,8 +273,8 @@ class GreenGardenProposal:
 
     def get_down_payment(self, category, spec, price_type, product_price, management_fee, quantity):
         """取得頭款金額"""
-       if 'cash' in price_type:return product_price    
-       else:return self.down_payments[category][spec][down_payment_key] * quantity
+        if 'cash' in price_type:return product_price    
+        else:return self.down_payments[category][spec][down_payment_key] * quantity
 
     def get_management_down_payment(self, category, spec, price_type, product_price, management_fee, quantity):
         """取得管理費頭款"""
@@ -775,3 +775,4 @@ def main():
 if __name__ == "__main__":
 
     main()
+
