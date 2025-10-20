@@ -267,7 +267,7 @@ class GreenGardenProposal:
             }
         }
 
-    def get_down_payment(self, category, spec, price_type, product_price, management_fee, quantity):
+    def get_down_payment(self, category, spec, price_type, quantity):
         """取得頭款金額"""
         if '現金' in price_type:
             return product_price
@@ -338,7 +338,7 @@ class GreenGardenProposal:
 
             # 計算產品頭款
             product_down_payment = self.get_down_payment(
-                product['category'], product['spec'], price_type, product_price, management_fee, quantity
+                product['category'], product['spec'], price_type, quantity
             )
             total_down_payment += product_down_payment
 
@@ -691,5 +691,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
