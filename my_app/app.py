@@ -500,7 +500,7 @@ def main():
                 spec = st.selectbox("層別", list(proposal_system.memorial_products[memorial_type].keys()), key=f"{memorial_type}_spec")
                 quantity = st.number_input("座數", min_value=1, max_value=10, value=1, key=f"{memorial_type}_quantity")
 
-                if spec in ["6、9", "7、8"]:
+                if cemetery_type == '大佛廳' or (cemetery_type == '彌陀廳' and spec in ["6、9", "7、8"]):
                     price_options = ["加購-現金價", "單購-現金價", "單購分期價"]
                 else:
                     price_options = ["加購-現金價", "單購-現金價"]
@@ -691,6 +691,5 @@ def main():
 
 if __name__ == "__main__":
     main()
-
 
 
