@@ -530,7 +530,7 @@ def main():
         with col1:
             st.subheader("墓園產品")
             cemetery_type = st.selectbox("選擇墓園類型", 
-                ["請選擇", "澤茵園", "寶祥家族", "聚賢閣", "永願", "天地", "恩典園一期"])
+                ["請選擇", "澤茵園", "寶祥家族", "聚賢閣", "永願","永念", "天地", "恩典園一期"])
             
             if cemetery_type != "請選擇":
                 spec = st.selectbox("規格", list(proposal_system.cemetery_products[cemetery_type].keys()))
@@ -796,3 +796,4 @@ def main():
 if __name__ == "__main__":
 
     main()
+
