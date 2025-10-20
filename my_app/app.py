@@ -257,13 +257,13 @@ class GreenGardenProposal:
                 "晨星2人": {"團購-分期價": 6600, "分期價": 6600}
             },
             "大佛廳": {
-                "1、2、10、11": {"單購-分期價": 23000},
-                "3、5、8、9": {"單購-分期價": 23000},
-                "6、7": {"單購-分期價": 23000}
+                "1、2、10、11": {"單購分期價": 23000},
+                "3、5、8、9": {"單購分期價": 23000},
+                "6、7": {"單購分期價": 23000}
             },
             "彌陀廳": {
-                "6、9": {"單購-分期價": 23000},
-                "7、8": {"單購-分期價": 23000}
+                "6、9": {"單購分期價": 23000},
+                "7、8": {"單購分期價": 23000}
             }
         }
 
@@ -455,7 +455,7 @@ def main():
     tab1, tab2 = st.tabs(["🛒 產品選擇", "📋 方案詳情"])
 
     with tab1:
-        st.markdown('<div class="section-header">產品選擇</div>', unsafe_allow_html=True)
+        #st.markdown('<div class="section-header">產品選擇</div>', unsafe_allow_html=True)
 
         # 產品選擇
         col1, col2, col3 = st.columns(3)
@@ -501,7 +501,7 @@ def main():
                 quantity = st.number_input("座數", min_value=1, max_value=10, value=1, key=f"{memorial_type}_quantity")
 
                 if memorial_type == '大佛廳' or (memorial_type == '彌陀廳' and spec in ["6、9", "7、8"]):
-                    price_options = ["加購-現金價", "單購-現金價", "單購-分期價"]
+                    price_options = ["加購-現金價", "單購-現金價", "單購分期價"]
                 else:
                     price_options = ["加購-現金價", "單購-現金價"]
 
@@ -532,7 +532,7 @@ def main():
                     with col_b:
                         if st.button("刪除", key=f"delete_{i}"):
                             st.session_state.selected_products.pop(i)
-                            st.rerun()
+                            st.rerun() # 重新執行腳本
 
                 if st.button("清空所有產品"):
                     st.session_state.selected_products = []
@@ -541,7 +541,7 @@ def main():
                 st.info("尚未選擇任何產品")
 
     with tab2:
-        st.markdown('<div class="section-header">方案詳情</div>', unsafe_allow_html=True)
+        #st.markdown('<div class="section-header">方案詳情</div>', unsafe_allow_html=True)
 
         if st.session_state.selected_products:
             totals = proposal_system.calculate_total(st.session_state.selected_products)
@@ -691,7 +691,5 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
 
 
