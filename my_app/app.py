@@ -528,7 +528,7 @@ def main():
                     col_a, col_b = st.columns([3, 1])
                     with col_a:
                         st.write(f"**{product['category']}** - {product['spec']}")
-                        st.write(f"座數: {product['quantity']} | 方式: {product['price_type']}")  # 直接顯示中文
+                        st.write(f"座數: {product['quantity']} | 購買方式: {product['price_type']}")  # 直接顯示中文
                     with col_b:
                         if st.button("刪除", key=f"delete_{i}"):
                             st.session_state.selected_products.pop(i)
@@ -691,6 +691,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
