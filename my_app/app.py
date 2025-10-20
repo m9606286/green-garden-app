@@ -280,8 +280,7 @@ class GreenGardenProposal:
         if '現金' in price_type:
             return management_fee
         else:
-            # 安全取值
-            return self.management_down_payments.get(category, {}).get(spec, {}).get(price_type, 0) * quantity
+            return self.down_payments[category][spec][down_payment_key] * quantity
 
     def calculate_installment_payment(self, product_price, management_fee, installment_terms, down_payment_amount, management_down_payment_amount):
         """計算分期付款"""
@@ -693,3 +692,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
