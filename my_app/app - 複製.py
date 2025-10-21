@@ -110,7 +110,14 @@ st.markdown("""
         width: 50% !important;
         margin: 0 auto;
     }
-    
+    .login-container {
+        max-width: 400px;
+        margin: 100px auto;
+        padding: 2rem;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -122,39 +129,26 @@ class AuthorizationSystem:
     
     def load_authorized_agents(self):
         """從Git上的Excel檔案載入授權的業務員資料"""
-        try:
-            # 下載Excel檔案
-            response = requests.get(self.excel_url)
-            response.raise_for_status()
+        # 下載Excel檔案
+        response = requests.get(self.excel_url)
+        response.raise_for_status()
             
-            # 讀取Excel檔案
-            df = pd.read_excel(io.BytesIO(response.content))
+        # 讀取Excel檔案
+        df = pd.read_excel(io.BytesIO(response.content))
             
-            # 檢查必要的欄位
-            required_columns = ['業務身份證字號', '業務姓名', '營業處']
-            if all(col in df.columns for col in required_columns):
-                authorized_dict = {}
-                for _, row in df.iterrows():
-                    agent_id = str(row['業務身份證字號']).strip().upper()
-                    agent_name = str(row['業務姓名']).strip()
-                    office = str(row['營業處']).strip()
-                    
-                    authorized_dict[agent_id] = {
-                        'name': agent_name,
-                        'office': office,
-                        'status': 'active'
-                    }
-                #st.success("✅ 授權名單載入成功")
-                return authorized_dict
-            else:
-                missing_cols = [col for col in required_columns if col not in df.columns]
-                st.error(f"Excel檔案缺少必要欄位：{missing_cols}")
-                return {}
-                
-        except Exception as e:
-            st.error(f"❌ 載入授權檔案失敗：{e}")
-            st.info("💡 請確認Excel檔案已上傳至GitHub，且包含以下欄位：業務身份證字號、業務姓名、營業處")
-            return {}
+        # 直接處理資料，不檢查欄位
+        authorized_dict = {}
+        for _, row in df.iterrows():
+            agent_id = str(row['業務身份證字號']).strip().upper()
+            agent_name = str(row['業務姓名']).strip()
+            office = str(row['營業處']).strip()
+            
+            authorized_dict[agent_id] = {
+                'name': agent_name,
+                'office': office,
+                'status': 'active'
+            }
+        return authorized_dict
     
     def verify_agent(self, agent_id):
         """驗證業務員身份證字號"""
@@ -181,10 +175,8 @@ class AuthorizationSystem:
                 </div>
                 """, unsafe_allow_html=True)
         
-        #st.markdown('<div style="text-align: center; margin-bottom: 2rem;">', unsafe_allow_html=True)
         st.title("🔐 業務系統登入")
         st.markdown('<p style="color: #666;">請輸入身份證字號進行驗證</p>', unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
         
         # 登入表單
         with st.form("login_form"):
@@ -270,6 +262,7 @@ class GreenGardenProposal:
         }
 
     def _init_memorial_products(self):
+        """初始化牌位產品資料"""
         return {
             "普羅廳": {
                 "1、2、15、16": {"定價": 120000, "加購-現金價": 50000, "單購-現金價": 66000, "單購-分期價": None, "分期期數": None, "管理費": 23000},
@@ -532,31 +525,28 @@ def main():
         auth_system.display_login_page()
     
     # 以下為授權成功後的內容
-    # 顯示用戶信息和登出按鈕在側邊欄
+    # 移除左邊的用戶資訊區塊，直接顯示基本資訊
     with st.sidebar:
-        st.header("👤 用戶資訊")
+        # 基本資訊
+        st.header("基本資訊")
+        client_name = st.text_input("客戶姓名", value="")
         
-        # 顯示身份證字號（部分隱藏）
-        masked_id = st.session_state.agent_id[:3] + '****' + st.session_state.agent_id[-3:]
-        st.success(f"**身份證字號:** {masked_id}")
-        st.info(f"**姓名:** {st.session_state.agent_info['name']}")
-        if st.session_state.agent_info.get('office'):
-            st.info(f"**營業處:** {st.session_state.agent_info['office']}")
+        # 自動填入專業顧問資訊（營業處 + 姓名）
+        agent_info = st.session_state.agent_info
+        office_name = agent_info.get('office', '')
+        consultant_display = f"{office_name}營業處-專業顧問：{agent_info['name']}"
+        st.text_input("專業顧問", value=consultant_display, disabled=True)
         
+        contact_phone = st.text_input("聯絡電話", value="")
+        proposal_date = st.date_input("日期", value=datetime.now())
+        
+        # 登出按鈕放在底部
+        st.markdown("---")
         if st.button("🚪 登出系統", use_container_width=True):
             for key in ['authorized', 'agent_id', 'agent_info']:
                 if key in st.session_state:
                     del st.session_state[key]
             st.rerun()
-        
-        st.markdown("---")
-        
-        # 客戶信息
-        st.header("客戶資訊")
-        client_name = st.text_input("客戶姓名", value="")
-        consultant_name = st.text_input("專業顧問", value=st.session_state.agent_info['name'])
-        contact_phone = st.text_input("聯絡電話", value="")
-        proposal_date = st.date_input("日期", value=datetime.now())
 
     # 顯示標題和圖檔
     st.markdown('<div class="header-container">', unsafe_allow_html=True)
@@ -621,7 +611,7 @@ def main():
                         "category": cemetery_type,
                         "spec": spec,
                         "quantity": quantity,
-                        "price_type": price_type,  # 直接存中文
+                        "price_type": price_type,
                         "type": "cemetery"
                     }
                     if new_product not in st.session_state.selected_products:
@@ -651,7 +641,7 @@ def main():
                         "category": memorial_type,
                         "spec": spec,
                         "quantity": quantity,
-                        "price_type": price_type,  # 直接存中文
+                        "price_type": price_type,
                         "type": "memorial"
                     }
                     if new_product not in st.session_state.selected_products:
@@ -667,11 +657,11 @@ def main():
                     col_a, col_b = st.columns([3, 1])
                     with col_a:
                         st.write(f"**{product['category']}** - {product['spec']}")
-                        st.write(f"座數: {product['quantity']} | 購買方式: {product['price_type']}")  # 直接顯示中文
+                        st.write(f"座數: {product['quantity']} | 購買方式: {product['price_type']}")
                     with col_b:
                         if st.button("刪除", key=f"delete_{i}"):
                             st.session_state.selected_products.pop(i)
-                            st.rerun() # 重新執行腳本
+                            st.rerun()
 
                 if st.button("清空所有產品"):
                     st.session_state.selected_products = []
@@ -699,7 +689,8 @@ def main():
             with col3:
                 st.metric(label="總管理費", value=f"{format_currency(totals['total_management_fee'])}")
             with col4:
-                st.metric(label="折扣後總價+總管理費", value=f"{format_currency(totals['final_total'])}")  
+                st.metric(label="折扣後總價+總管理費", value=f"{format_currency(totals['final_total'])}")
+
             # 產品明細
             st.markdown('<div style="margin-bottom: -3rem; font-weight: bold;">產品明細</div>', unsafe_allow_html=True)
 
@@ -819,12 +810,11 @@ def main():
 
         col1, col2, col3 = st.columns(3)
         with col1:
-           st.markdown(f'<div class="client-info-content"><strong>專業顧問：</strong>{consultant_name if consultant_name else ""}</div>', unsafe_allow_html=True)
+           st.markdown(f'<div class="client-info-content"><strong>專業顧問：</strong>{consultant_display}</div>', unsafe_allow_html=True)
         with col2:
            st.markdown(f'<div class="client-info-content"><strong>聯絡電話：</strong>{contact_phone if contact_phone else ""}</div>', unsafe_allow_html=True)
         with col3:
            st.markdown(f'<div class="client-info-content"><strong>日期：</strong>{proposal_date.strftime("%Y-%m-%d")}</div>', unsafe_allow_html=True)
 
 if __name__ == "__main__":
-
     main()
