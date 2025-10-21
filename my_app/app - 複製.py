@@ -2,7 +2,8 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 from datetime import datetime
-import os
+import requests
+import io
 
 # 頁面配置
 st.set_page_config(
@@ -121,55 +122,50 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 class AuthorizationSystem:
-    def __init__(self, excel_file="authorized_agents.xlsx"):
-        self.excel_file = excel_file
+    def __init__(self, excel_url=None):
+        # 預設的Excel檔案URL（放在GitHub上）
+        self.excel_url = excel_url or "https://raw.githubusercontent.com/m9606286/green-garden-app/main/authorized_agents.xlsx"
         self.authorized_agents = self.load_authorized_agents()
     
     def load_authorized_agents(self):
-        """從Excel檔案載入授權的業務員資料"""
+        """從Git上的Excel檔案載入授權的業務員資料"""
         try:
-            if os.path.exists(self.excel_file):
-                df = pd.read_excel(self.excel_file)
-                # 確保必要的欄位存在
-                if 'agent_id' in df.columns and 'agent_name' in df.columns:
-                    authorized_dict = {}
-                    for _, row in df.iterrows():
-                        agent_id = str(row['agent_id']).strip()
-                        agent_name = str(row['agent_name']).strip()
-                        authorized_dict[agent_id] = {
-                            'name': agent_name,
-                            'department': row.get('department', ''),
-                            'status': row.get('status', 'active')
-                        }
-                    return authorized_dict
-                else:
-                    st.error("Excel檔案格式錯誤：必須包含 'agent_id' 和 'agent_name' 欄位")
+            # 下載Excel檔案
+            response = requests.get(self.excel_url)
+            response.raise_for_status()
+            
+            # 讀取Excel檔案
+            df = pd.read_excel(io.BytesIO(response.content))
+            
+            # 檢查必要的欄位
+            required_columns = ['業務身份證字號', '業務姓名', '營業處']
+            if all(col in df.columns for col in required_columns):
+                authorized_dict = {}
+                for _, row in df.iterrows():
+                    agent_id = str(row['業務身份證字號']).strip().upper()
+                    agent_name = str(row['業務姓名']).strip()
+                    office = str(row['營業處']).strip()
+                    
+                    authorized_dict[agent_id] = {
+                        'name': agent_name,
+                        'office': office,
+                        'status': 'active'
+                    }
+                st.success("✅ 授權名單載入成功")
+                return authorized_dict
             else:
-                # 如果檔案不存在，建立範例檔案
-                self.create_sample_excel()
-                return self.load_authorized_agents()
+                missing_cols = [col for col in required_columns if col not in df.columns]
+                st.error(f"Excel檔案缺少必要欄位：{missing_cols}")
+                return {}
+                
         except Exception as e:
-            st.error(f"載入授權檔案失敗：{e}")
+            st.error(f"❌ 載入授權檔案失敗：{e}")
+            st.info("💡 請確認Excel檔案已上傳至GitHub，且包含以下欄位：業務身份證字號、業務姓名、營業處")
             return {}
     
-    def create_sample_excel(self):
-        """建立範例Excel檔案"""
-        try:
-            sample_data = {
-                'agent_id': ['A001', 'A002', 'A003', 'ADMIN001'],
-                'agent_name': ['張大明', '李小華', '王曉雯', '系統管理員'],
-                'department': ['業務部', '業務部', '業務部', '管理部'],
-                'status': ['active', 'active', 'active', 'active']
-            }
-            df = pd.DataFrame(sample_data)
-            df.to_excel(self.excel_file, index=False)
-            st.info(f"已建立範例授權檔案：{self.excel_file}")
-        except Exception as e:
-            st.error(f"建立範例檔案失敗：{e}")
-    
     def verify_agent(self, agent_id):
-        """驗證業務員ID"""
-        agent_id = str(agent_id).strip()
+        """驗證業務員身份證字號"""
+        agent_id = str(agent_id).strip().upper()
         if agent_id in self.authorized_agents:
             agent_info = self.authorized_agents[agent_id]
             if agent_info.get('status') == 'active':
@@ -180,50 +176,80 @@ class AuthorizationSystem:
         """顯示登入頁面"""
         st.markdown('<div class="login-container">', unsafe_allow_html=True)
         
+        # 標題和logo
         col1, col2, col3 = st.columns([1, 2, 1])
         with col2:
-            st.image("https://raw.githubusercontent.com/m9606286/green-garden-app/main/my_app/綠金園.png", width=100)
+            try:
+                st.image("https://raw.githubusercontent.com/m9606286/green-garden-app/main/my_app/綠金園.png", width=100)
+            except:
+                st.markdown("""
+                <div style="width: 100px; height: 100px; background: #2E8B57; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; margin: 0 auto;">
+                    綠金園
+                </div>
+                """, unsafe_allow_html=True)
         
         st.markdown('<div style="text-align: center; margin-bottom: 2rem;">', unsafe_allow_html=True)
-        st.title("🔐 業務系統")
-        st.markdown('<p style="color: #666;">請輸入您的業務ID進行授權驗證</p>', unsafe_allow_html=True)
+        st.title("🔐 業務系統登入")
+        st.markdown('<p style="color: #666;">請輸入身份證字號進行驗證</p>', unsafe_allow_html=True)
         st.markdown('</div>', unsafe_allow_html=True)
         
+        # 登入表單
         with st.form("login_form"):
-            agent_id = st.text_input("業務ID", placeholder="請輸入您的業務ID", key="agent_id_input")
-            submit_button = st.form_submit_button("登入系統")
+            id_number = st.text_input(
+                "身份證字號", 
+                placeholder="請輸入您的身份證字號",
+                help="請輸入完整的身份證字號（英文字母大寫）"
+            )
+            submit_button = st.form_submit_button("登入系統", use_container_width=True)
             
             if submit_button:
-                if agent_id:
-                    agent_info = self.verify_agent(agent_id)
+                if id_number:
+                    agent_info = self.verify_agent(id_number)
                     if agent_info:
                         st.session_state.authorized = True
-                        st.session_state.agent_id = agent_id
+                        st.session_state.agent_id = id_number.upper()
                         st.session_state.agent_info = agent_info
-                        st.success(f"授權成功！歡迎 {agent_info['name']}")
+                        st.success(f"✅ 驗證成功！歡迎 {agent_info['name']}")
                         st.rerun()
                     else:
-                        st.error("❌ 業務ID未授權或已被停用，請聯繫管理員")
+                        st.error("❌ 身份證字號未授權，請聯繫管理員")
                 else:
-                    st.warning("⚠️ 請輸入業務ID")
+                    st.warning("⚠️ 請輸入身份證字號")
         
-        # 顯示授權的業務員清單（僅供參考）
-        with st.expander("已授權業務員清單"):
+        # 顯示授權業務員清單（僅供參考）
+        with st.expander("📋 已授權業務員清單"):
             if self.authorized_agents:
                 agent_list = []
                 for agent_id, info in self.authorized_agents.items():
                     if info.get('status') == 'active':
+                        # 隱藏部分身份證字號以保護隱私
+                        masked_id = agent_id[:3] + '****' + agent_id[-3:]
                         agent_list.append({
-                            '業務ID': agent_id,
+                            '身份證字號': masked_id,
                             '姓名': info['name'],
-                            '部門': info.get('department', '')
+                            '營業處': info.get('office', '')
                         })
+                
                 if agent_list:
                     st.dataframe(pd.DataFrame(agent_list), use_container_width=True)
                 else:
                     st.info("暫無有效授權業務員")
             else:
                 st.warning("無法載入授權清單")
+        
+        # 使用說明
+        with st.expander("💡 使用說明"):
+            st.markdown("""
+            **登入說明：**
+            1. 請輸入您的身份證字號（英文字母請大寫）
+            2. 系統會自動驗證您的授權狀態
+            3. 驗證成功後即可使用系統功能
+            
+            **遇到問題？**
+            - 確認身份證字號輸入正確
+            - 確認英文字母為大寫
+            - 如持續無法登入，請聯繫系統管理員
+            """)
         
         st.markdown('</div>', unsafe_allow_html=True)
         st.stop()
@@ -537,12 +563,15 @@ def main():
     # 顯示用戶信息和登出按鈕在側邊欄
     with st.sidebar:
         st.header("👤 用戶資訊")
-        st.success(f"**業務ID:** {st.session_state.agent_id}")
-        st.info(f"**姓名:** {st.session_state.agent_info['name']}")
-        if st.session_state.agent_info.get('department'):
-            st.info(f"**部門:** {st.session_state.agent_info['department']}")
         
-        if st.button("🚪 登出系統"):
+        # 顯示身份證字號（部分隱藏）
+        masked_id = st.session_state.agent_id[:3] + '****' + st.session_state.agent_id[-3:]
+        st.success(f"**身份證字號:** {masked_id}")
+        st.info(f"**姓名:** {st.session_state.agent_info['name']}")
+        if st.session_state.agent_info.get('office'):
+            st.info(f"**營業處:** {st.session_state.agent_info['office']}")
+        
+        if st.button("🚪 登出系統", use_container_width=True):
             for key in ['authorized', 'agent_id', 'agent_info']:
                 if key in st.session_state:
                     del st.session_state[key]
@@ -698,4 +727,131 @@ def main():
             with col3:
                 st.metric(label="總管理費", value=f"{format_currency(totals['total_management_fee'])}")
             with col4:
-                st.metric(label="折扣後總價+總管理費", value=f"{format_currency(tot
+                st.metric(label="折扣後總價+總管理費", value=f"{format_currency(totals['final_total'])}")  
+            # 產品明細
+            st.markdown('<div style="margin-bottom: -3rem; font-weight: bold;">產品明細</div>', unsafe_allow_html=True)
+
+            simple_product_data = []
+            for detail in totals['product_details']:
+                simple_product_data.append({
+                    '產品': f"{detail['category']} {detail['spec']}",
+                    '座數': detail['quantity'],
+                    '購買方式': detail['price_type'],
+                    '定價': format_currency(detail['original_price']),
+                    '優惠價': format_currency(detail['product_price']),
+                    '管理費': format_currency(detail['management_fee'])
+                })
+
+            simple_df = pd.DataFrame(simple_product_data)
+            st.markdown('<div class="compact-table half-width-table">', unsafe_allow_html=True)
+            st.dataframe(simple_df, use_container_width=False, hide_index=True)
+            st.markdown('</div>', unsafe_allow_html=True)
+
+            # 產品分期明細（如果有分期產品）
+            installment_details = []
+            for detail in totals['product_details']:
+                if detail['installment_terms']:
+                    installment_details.append({
+                        '產品': f"{detail['category']}\n{detail['spec']}",
+                        '座數': detail['quantity'],
+                        '期數': f"{detail['installment_terms']}期",
+                        '產品頭款': format_currency(detail['product_down_payment']),
+                        '產品期款': format_currency(detail['product_monthly_payment']),
+                        '管理費頭款': format_currency(detail['management_down_payment']),
+                        '管理費期款': format_currency(detail['management_monthly_payment'])
+                    })
+
+            if installment_details:
+                st.markdown('<div style="margin-bottom: -3rem; font-weight: bold;">產品分期明細</div>', unsafe_allow_html=True)
+                installment_df = pd.DataFrame(installment_details)
+                st.markdown('<div class="compact-table half-width-table">', unsafe_allow_html=True)
+                st.dataframe(installment_df, use_container_width=False, hide_index=True)
+                st.markdown('</div>', unsafe_allow_html=True)
+
+                # 分期總結
+                st.markdown('<div style="margin-bottom: -2rem; font-weight: bold;">分期總結</div>', unsafe_allow_html=True)
+
+                total_down_payment = totals['total_down_payment']
+                total_management_down_payment = totals['total_management_down_payment']
+                st.markdown(f'<div class="installment-item">頭期款：{format_currency(total_down_payment + total_management_down_payment)} (產品 {format_currency(total_down_payment)}、管理費 {format_currency(total_management_down_payment)})</div>', unsafe_allow_html=True)
+
+                # 計算月繳總額
+                payment_schedule = {}
+                product_payment_schedule = {}
+                management_payment_schedule = {}
+
+                all_terms = []
+                for detail in totals['product_details']:
+                    if detail['installment_terms']:
+                        all_terms.append(detail['installment_terms'])
+
+                if all_terms:
+                    max_term = max(all_terms)
+
+                    for term in range(1, max_term + 1):
+                        payment_schedule[term] = 0
+                        product_payment_schedule[term] = 0
+                        management_payment_schedule[term] = 0
+
+                    for detail in totals['product_details']:
+                        if detail['installment_terms']:
+                            terms = detail['installment_terms']
+                            product_monthly = detail['product_monthly_payment']
+                            management_monthly = detail['management_monthly_payment']
+                            total_monthly = product_monthly + management_monthly
+
+                            for term in range(1, terms + 1):
+                                payment_schedule[term] += total_monthly
+                                product_payment_schedule[term] += product_monthly
+                                management_payment_schedule[term] += management_monthly
+
+                    current_total = payment_schedule[1]
+                    current_product = product_payment_schedule[1]
+                    current_management = management_payment_schedule[1]
+                    start_period = 1
+
+                    for term in range(2, max_term + 2):
+                        if term > max_term or (payment_schedule.get(term, current_total) != current_total):
+                            if start_period == term - 1:
+                                st.markdown(f'<div class="installment-item">第{start_period}期：每期 {format_currency(current_total)} (產品{format_currency(current_product)}、管理費 {format_currency(current_management)})</div>', unsafe_allow_html=True)
+                            else:
+                                st.markdown(f'<div class="installment-item">第{start_period}~{term-1}期：每期 {format_currency(current_total)} (產品{format_currency(current_product)}、管理費 {format_currency(current_management)})</div>', unsafe_allow_html=True)
+
+                            if term <= max_term:
+                                start_period = term
+                                current_total = payment_schedule[term]
+                                current_product = product_payment_schedule[term]
+                                current_management = management_payment_schedule[term]
+
+            # 規劃配置分析
+            st.markdown('<div class="analysis-title">「早規劃、早安心，現在購買最划算」</div>', unsafe_allow_html=True)
+            savings = totals['total_original'] - totals['total_discounted']
+            discount_rate = totals['discount_rate'] * 100
+            st.markdown(f"""
+            <div class="analysis-content">
+            因應通膨，商品價格將依階段逐步調漲至定價，另外管理費亦會隨商品價格按比例同步調漲。若您現在購買，不僅可提前鎖定目前優惠，立即節省{format_currency(savings)}元 (相當於{discount_rate:.0f}%的折扣)，更能同時享有未來價格上漲的增值潛力，對日後轉售亦具明顯效益。
+            <br><br>
+            本建議書提供客戶七日審閱期，建議價格自本建議書日期起七天內有效，實際成交價格仍以公司最新公告為準。
+            <br><br>
+            </div>
+            """, unsafe_allow_html=True)
+
+        else:
+            st.info("請先在「產品選擇」標籤頁選擇產品")
+
+        # 基本資訊顯示在建議書最下方
+        col1, col2 = st.columns([1, 4])
+        with col1:
+            morning_logo_url = "https://raw.githubusercontent.com/m9606286/green-garden-app/main/my_app/晨暉logo.png"
+            st.image(morning_logo_url, width=200)
+
+        col1, col2, col3 = st.columns(3)
+        with col1:
+           st.markdown(f'<div class="client-info-content"><strong>專業顧問：</strong>{consultant_name if consultant_name else ""}</div>', unsafe_allow_html=True)
+        with col2:
+           st.markdown(f'<div class="client-info-content"><strong>聯絡電話：</strong>{contact_phone if contact_phone else ""}</div>', unsafe_allow_html=True)
+        with col3:
+           st.markdown(f'<div class="client-info-content"><strong>日期：</strong>{proposal_date.strftime("%Y-%m-%d")}</div>', unsafe_allow_html=True)
+
+if __name__ == "__main__":
+    main()
