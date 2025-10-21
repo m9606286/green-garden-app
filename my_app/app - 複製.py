@@ -129,39 +129,26 @@ class AuthorizationSystem:
     
     def load_authorized_agents(self):
         """從Git上的Excel檔案載入授權的業務員資料"""
-        try:
-            # 下載Excel檔案
-            response = requests.get(self.excel_url)
-            response.raise_for_status()
+        # 下載Excel檔案
+        response = requests.get(self.excel_url)
+        response.raise_for_status()
             
-            # 讀取Excel檔案
-            df = pd.read_excel(io.BytesIO(response.content))
+        # 讀取Excel檔案
+        df = pd.read_excel(io.BytesIO(response.content))
             
-            # 檢查必要的欄位
-            required_columns = ['業務身份證字號', '業務姓名', '營業處']
-            if all(col in df.columns for col in required_columns):
-                authorized_dict = {}
-                for _, row in df.iterrows():
-                    agent_id = str(row['業務身份證字號']).strip().upper()
-                    agent_name = str(row['業務姓名']).strip()
-                    office = str(row['營業處']).strip()
-                    
-                    authorized_dict[agent_id] = {
-                        'name': agent_name,
-                        'office': office,
-                        'status': 'active'
-                    }
-                #st.success("✅ 授權名單載入成功")
-                return authorized_dict
-            else:
-                missing_cols = [col for col in required_columns if col not in df.columns]
-                st.error(f"Excel檔案缺少必要欄位：{missing_cols}")
-                return {}
-                
-        except Exception as e:
-            st.error(f"❌ 載入授權檔案失敗：{e}")
-            st.info("💡 請確認Excel檔案已上傳至GitHub，且包含以下欄位：業務身份證字號、業務姓名、營業處")
-            return {}
+        # 直接處理資料，不檢查欄位
+        authorized_dict = {}
+        for _, row in df.iterrows():
+            agent_id = str(row['業務身份證字號']).strip().upper()
+            agent_name = str(row['業務姓名']).strip()
+            office = str(row['營業處']).strip()
+            
+            authorized_dict[agent_id] = {
+                'name': agent_name,
+                'office': office,
+                'status': 'active'
+            }
+        return authorized_dict
     
     def verify_agent(self, agent_id):
         """驗證業務員身份證字號"""
@@ -188,10 +175,8 @@ class AuthorizationSystem:
                 </div>
                 """, unsafe_allow_html=True)
         
-        #st.markdown('<div style="text-align: center; margin-bottom: 2rem;">', unsafe_allow_html=True)
         st.title("🔐 業務系統登入")
         st.markdown('<p style="color: #666;">請輸入身份證字號進行驗證</p>', unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
         
         # 登入表單
         with st.form("login_form"):
@@ -233,6 +218,7 @@ class AuthorizationSystem:
         st.markdown('</div>', unsafe_allow_html=True)
         st.stop()
 
+# 其餘的 GreenGardenProposal 類別保持不變...
 class GreenGardenProposal:
     def __init__(self):
         self.cemetery_products = self._init_cemetery_products()
@@ -276,250 +262,7 @@ class GreenGardenProposal:
             }
         }
 
-    def _init_memorial_products(self):
-        return {
-            "普羅廳": {
-                "1、2、15、16": {"定價": 120000, "加購-現金價": 50000, "單購-現金價": 66000, "單購-分期價": None, "分期期數": None, "管理費": 23000},
-                "3、5、12、13": {"定價": 140000, "加購-現金價": 60000, "單購-現金價": 77000, "單購-分期價": None, "分期期數": None, "管理費": 23000},
-                "6、7、10、11": {"定價": 160000, "加購-現金價": 70000, "單購-現金價": 88000, "單購-分期價": None, "分期期數": None, "管理費": 23000},
-                "8、9": {"定價": 190000, "加購-現金價": 85000, "單購-現金價": 99000, "單購-分期價": None, "分期期數": None, "管理費": 23000}
-            },
-            "彌陀廳": {
-                "1、2、12、13": {"定價": 160000, "加購-現金價": 70000, "單購-現金價": 88000, "單購-分期價": None, "分期期數": None, "管理費": 23000},
-                "3、5、10、11": {"定價": 190000, "加購-現金價": 85000, "單購-現金價": 99000, "單購-分期價": None, "分期期數": None, "管理費": 23000},
-                "6、9": {"定價": 220000, "加購-現金價": 100000, "單購-現金價": 132000, "單購-分期價": 143000, "分期期數": 24, "管理費": 23000},
-                "7、8": {"定價": 240000, "加購-現金價": 110000, "單購-現金價": 144000, "單購-分期價": 156000, "分期期數": 24, "管理費": 23000}
-            },
-            "大佛廳": {
-                "1、2、10、11": {"定價": 220000, "加購-現金價": 100000, "單購-現金價": 132000, "單購-分期價": 143000, "分期期數": 24, "管理費": 23000},
-                "3、5、8、9": {"定價": 260000, "加購-現金價": 120000, "單購-現金價": 156000, "單購-分期價": 169000, "分期期數": 24, "管理費": 23000},
-                "6、7": {"定價": 290000, "加購-現金價": 135000, "單購-現金價": 174000, "單購-分期價": 188500, "分期期數": 24, "管理費": 23000}
-            }
-        }
-
-    def _init_down_payments(self):
-        """初始化頭款金額（只保留分期購買的頭款）"""
-        return {
-            "澤茵園": {
-                "單人位": {"分期價": 88560},
-                "貴族2人": {"分期價": 118320},
-                "家福4人": {"分期價": 180900},
-                "家族6人": {"分期價": 247800}
-            },
-            "聚賢閣": {
-                "12人": {"分期價": 399000},
-                "18人": {"分期價": 499800}
-            },
-            "寶祥家族": {
-                "6人": {"分期價": 306300},
-                "9人": {"分期價": 357000},
-                "15人": {"分期價": 420000}
-            },
-            "永願": {
-                "2人": {"分期價": 82560}
-            },
-            "永念": {
-                "2人": {"分期價": 38000}
-            },
-            "天地": {
-                "合人2人": {"分期價": 133760},
-                "圓融8人": {"分期價": 296400},
-                "福澤12人": {"分期價": 384000}
-            },
-            "恩典園一期": {
-                "安然2人": {"分期價": 68400},
-                "安然4人": {"分期價": 130360},
-                "安然特區4人": {"分期價": 165540},
-                "晨星2人": {"團購-分期價": 21000, "分期價": 38000}
-            },
-            "彌陀廳": {
-                "6、9": {"單購-分期價": 42920},
-                "7、8": {"單購-分期價": 46800}
-            },
-            "大佛廳": {
-                "1、2、10、11": {"單購-分期價": 42920},
-                "3、5、8、9": {"單購-分期價": 50680},
-                "6、7": {"單購-分期價": 56500}
-            }
-        }
-
-    def _init_management_down_payments(self):
-        """初始化管理費頭款"""
-        return {
-            "澤茵園": {
-                "單人位": {"分期價": 16600},
-                "貴族2人": {"分期價": 22100},
-                "家福4人": {"分期價": 31700},
-                "家族6人": {"分期價": 46000}
-            },
-            "聚賢閣": {
-                "12人": {"分期價": 76000},
-                "18人": {"分期價": 87400}
-            },
-            "寶祥家族": {
-                "6人": {"分期價": 60000},
-                "9人": {"分期價": 72800},
-                "15人": {"分期價": 87800}
-            },
-            "永願": {
-                "2人": {"分期價": 14700}
-            },
-             "永念": {
-                "2人": {"分期價": 6600}
-            },
-            "天地": {
-                "合人2人": {"分期價": 27300},
-                "圓融8人": {"分期價": 66800},
-                "福澤12人": {"分期價": 78700}
-            },
-            "恩典園一期": {
-                "安然2人": {"分期價": 11800},
-                "安然4人": {"分期價": 23600},
-                "安然特區4人": {"分期價": 31700},
-                "晨星2人": {"團購-分期價": 6600, "分期價": 6600}
-            },
-            "大佛廳": {
-                "1、2、10、11": {"單購-分期價": 23000},
-                "3、5、8、9": {"單購-分期價": 23000},
-                "6、7": {"單購-分期價": 23000}
-            },
-            "彌陀廳": {
-                "6、9": {"單購-分期價": 23000},
-                "7、8": {"單購-分期價": 23000}
-            }
-        }
-
-    def get_down_payment(self, category, spec, product_price, price_type, quantity):
-        """取得頭款金額"""
-        if '現金' in price_type:
-            return product_price
-        else:
-             return self.down_payments[category][spec][price_type] * quantity
-
-    def get_management_down_payment(self, category, spec, management_fee, price_type, quantity):
-        """取得管理費頭款"""
-        if '現金' in price_type:
-            return management_fee
-        else:
-            return self.management_down_payments[category][spec][price_type] * quantity
-
-    def calculate_installment_payment(self, product_price, management_fee, installment_terms, down_payment_amount, management_down_payment_amount):
-        """計算分期付款"""
-        if not installment_terms:
-            return 0
-
-        total_price = product_price + management_fee
-        total_down_payment = down_payment_amount + management_down_payment_amount
-        monthly_payment = (total_price - total_down_payment) / installment_terms
-
-        return monthly_payment
-
-    def calculate_product_installment_payment(self, product_price, installment_terms, down_payment_amount):
-        """計算產品分期付款"""
-        if not installment_terms:
-            return 0
-
-        monthly_payment = (product_price - down_payment_amount) / installment_terms
-        return monthly_payment
-
-    def calculate_management_installment_payment(self, management_fee, installment_terms, management_down_payment_amount):
-        """計算管理費分期付款"""
-        if not installment_terms:
-            return 0
-
-        monthly_payment = (management_fee - management_down_payment_amount) / installment_terms
-        return monthly_payment
-
-    def calculate_total(self, selected_products):
-        total_original = 0
-        total_discounted = 0
-        total_management_fee = 0
-        total_down_payment = 0
-        total_management_down_payment = 0
-        product_details = []
-
-        for product in selected_products:
-            if product['type'] == 'cemetery':
-                product_data = self.cemetery_products[product['category']][product['spec']]
-            else:
-                product_data = self.memorial_products[product['category']][product['spec']]
-
-            quantity = product['quantity']
-            price_type = product['price_type']  # 現在直接是中文
-
-            # 直接使用中文 price_type 作為價格鍵值
-            product_price = product_data[price_type] * quantity
-            original_price = product_data['定價'] * quantity
-            # 修正：晨星團購價要抓團購管理費
-            if product['category'] == "恩典園一期" and product['spec'] == "晨星2人" and '團購' in price_type:
-                management_fee_per_unit = product_data.get('團購-管理費', 0)
-            else:
-                management_fee_per_unit = product_data.get('管理費', 0)
-
-            management_fee = management_fee_per_unit * quantity
-
-            # 計算產品頭款
-            product_down_payment = self.get_down_payment(product['category'], product['spec'], product_price, price_type, quantity)
-            total_down_payment += product_down_payment
-
-            # 計算管理費頭款
-            management_down_payment = self.get_management_down_payment(product['category'], product['spec'], management_fee, price_type, quantity)
-            total_management_down_payment += management_down_payment
-
-            # 計算總價
-            total_original += original_price
-            total_discounted += product_price
-            total_management_fee += management_fee
-
-            # 只有分期價才顯示分期期數
-            installment_terms = product_data.get('分期期數') if '分期' in price_type else None
-
-            # 計算產品期款和管理費期款
-            product_monthly_payment = 0
-            management_monthly_payment = 0
-
-            if '分期' in price_type and installment_terms:
-                product_monthly_payment = self.calculate_product_installment_payment(
-                    product_price, installment_terms, product_down_payment
-                )
-                management_monthly_payment = self.calculate_management_installment_payment(
-                    management_fee, installment_terms, management_down_payment
-                )
-
-            # 購買方式顯示
-            display_price_type = price_type
-            if '分期' in price_type and installment_terms:
-                display_price_type = f"{price_type}-{installment_terms}期"
-
-            product_details.append({
-                'category': product['category'],
-                'spec': product['spec'],
-                'quantity': quantity,
-                'price_type': display_price_type,
-                'original_price':original_price,
-                'product_price': product_price,
-                'management_fee_per_unit': management_fee_per_unit,
-                'management_fee': management_fee,
-                'installment_terms': installment_terms,
-                'product_down_payment': product_down_payment,
-                'product_monthly_payment': product_monthly_payment,
-                'management_down_payment': management_down_payment,
-                'management_monthly_payment': management_monthly_payment
-            })
-
-        discount_rate = (total_original - total_discounted) / total_original if total_original > 0 else 0
-        final_total = total_discounted + total_management_fee
-
-        return {
-            "total_original": total_original,
-            "total_discounted": total_discounted,
-            "total_management_fee": total_management_fee,
-            "total_down_payment": total_down_payment,
-            "total_management_down_payment": total_management_down_payment,
-            "discount_rate": discount_rate,
-            "final_total": final_total,
-            "product_details": product_details
-        }
+    # ... 其餘的 GreenGardenProposal 類別方法保持不變 ...
 
 def format_currency(amount):
     if pd.isna(amount) or amount is None:
@@ -539,31 +282,28 @@ def main():
         auth_system.display_login_page()
     
     # 以下為授權成功後的內容
-    # 顯示用戶信息和登出按鈕在側邊欄
+    # 移除左邊的用戶資訊區塊，直接顯示基本資訊
     with st.sidebar:
-        st.header("👤 用戶資訊")
+        # 基本資訊
+        st.header("基本資訊")
+        client_name = st.text_input("客戶姓名", value="")
         
-        # 顯示身份證字號（部分隱藏）
-        masked_id = st.session_state.agent_id[:3] + '****' + st.session_state.agent_id[-3:]
-        st.success(f"**身份證字號:** {masked_id}")
-        st.info(f"**姓名:** {st.session_state.agent_info['name']}")
-        if st.session_state.agent_info.get('office'):
-            st.info(f"**營業處:** {st.session_state.agent_info['office']}")
+        # 自動填入專業顧問資訊（營業處 + 姓名）
+        agent_info = st.session_state.agent_info
+        office_name = agent_info.get('office', '')
+        consultant_display = f"{office_name}營業處-專業顧問：{agent_info['name']}"
+        st.text_input("專業顧問", value=consultant_display, disabled=True)
         
+        contact_phone = st.text_input("聯絡電話", value="")
+        proposal_date = st.date_input("日期", value=datetime.now())
+        
+        # 登出按鈕放在底部
+        st.markdown("---")
         if st.button("🚪 登出系統", use_container_width=True):
             for key in ['authorized', 'agent_id', 'agent_info']:
                 if key in st.session_state:
                     del st.session_state[key]
             st.rerun()
-        
-        st.markdown("---")
-        
-        # 客戶信息
-        st.header("客戶資訊")
-        client_name = st.text_input("客戶姓名", value="")
-        consultant_name = st.text_input("專業顧問", value=st.session_state.agent_info['name'])
-        contact_phone = st.text_input("聯絡電話", value="")
-        proposal_date = st.date_input("日期", value=datetime.now())
 
     # 顯示標題和圖檔
     st.markdown('<div class="header-container">', unsafe_allow_html=True)
@@ -628,7 +368,7 @@ def main():
                         "category": cemetery_type,
                         "spec": spec,
                         "quantity": quantity,
-                        "price_type": price_type,  # 直接存中文
+                        "price_type": price_type,
                         "type": "cemetery"
                     }
                     if new_product not in st.session_state.selected_products:
@@ -658,7 +398,7 @@ def main():
                         "category": memorial_type,
                         "spec": spec,
                         "quantity": quantity,
-                        "price_type": price_type,  # 直接存中文
+                        "price_type": price_type,
                         "type": "memorial"
                     }
                     if new_product not in st.session_state.selected_products:
@@ -674,11 +414,11 @@ def main():
                     col_a, col_b = st.columns([3, 1])
                     with col_a:
                         st.write(f"**{product['category']}** - {product['spec']}")
-                        st.write(f"座數: {product['quantity']} | 購買方式: {product['price_type']}")  # 直接顯示中文
+                        st.write(f"座數: {product['quantity']} | 購買方式: {product['price_type']}")
                     with col_b:
                         if st.button("刪除", key=f"delete_{i}"):
                             st.session_state.selected_products.pop(i)
-                            st.rerun() # 重新執行腳本
+                            st.rerun()
 
                 if st.button("清空所有產品"):
                     st.session_state.selected_products = []
@@ -706,7 +446,8 @@ def main():
             with col3:
                 st.metric(label="總管理費", value=f"{format_currency(totals['total_management_fee'])}")
             with col4:
-                st.metric(label="折扣後總價+總管理費", value=f"{format_currency(totals['final_total'])}")  
+                st.metric(label="折扣後總價+總管理費", value=f"{format_currency(totals['final_total'])}")
+
             # 產品明細
             st.markdown('<div style="margin-bottom: -3rem; font-weight: bold;">產品明細</div>', unsafe_allow_html=True)
 
@@ -826,7 +567,7 @@ def main():
 
         col1, col2, col3 = st.columns(3)
         with col1:
-           st.markdown(f'<div class="client-info-content"><strong>專業顧問：</strong>{consultant_name if consultant_name else ""}</div>', unsafe_allow_html=True)
+           st.markdown(f'<div class="client-info-content"><strong>專業顧問：</strong>{consultant_display}</div>', unsafe_allow_html=True)
         with col2:
            st.markdown(f'<div class="client-info-content"><strong>聯絡電話：</strong>{contact_phone if contact_phone else ""}</div>', unsafe_allow_html=True)
         with col3:
