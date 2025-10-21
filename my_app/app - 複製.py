@@ -218,7 +218,6 @@ class AuthorizationSystem:
         st.markdown('</div>', unsafe_allow_html=True)
         st.stop()
 
-# 其餘的 GreenGardenProposal 類別保持不變...
 class GreenGardenProposal:
     def __init__(self):
         self.cemetery_products = self._init_cemetery_products()
@@ -262,7 +261,251 @@ class GreenGardenProposal:
             }
         }
 
-    # ... 其餘的 GreenGardenProposal 類別方法保持不變 ...
+    def _init_memorial_products(self):
+        """初始化牌位產品資料"""
+        return {
+            "普羅廳": {
+                "1、2、15、16": {"定價": 120000, "加購-現金價": 50000, "單購-現金價": 66000, "單購-分期價": None, "分期期數": None, "管理費": 23000},
+                "3、5、12、13": {"定價": 140000, "加購-現金價": 60000, "單購-現金價": 77000, "單購-分期價": None, "分期期數": None, "管理費": 23000},
+                "6、7、10、11": {"定價": 160000, "加購-現金價": 70000, "單購-現金價": 88000, "單購-分期價": None, "分期期數": None, "管理費": 23000},
+                "8、9": {"定價": 190000, "加購-現金價": 85000, "單購-現金價": 99000, "單購-分期價": None, "分期期數": None, "管理費": 23000}
+            },
+            "彌陀廳": {
+                "1、2、12、13": {"定價": 160000, "加購-現金價": 70000, "單購-現金價": 88000, "單購-分期價": None, "分期期數": None, "管理費": 23000},
+                "3、5、10、11": {"定價": 190000, "加購-現金價": 85000, "單購-現金價": 99000, "單購-分期價": None, "分期期數": None, "管理費": 23000},
+                "6、9": {"定價": 220000, "加購-現金價": 100000, "單購-現金價": 132000, "單購-分期價": 143000, "分期期數": 24, "管理費": 23000},
+                "7、8": {"定價": 240000, "加購-現金價": 110000, "單購-現金價": 144000, "單購-分期價": 156000, "分期期數": 24, "管理費": 23000}
+            },
+            "大佛廳": {
+                "1、2、10、11": {"定價": 220000, "加購-現金價": 100000, "單購-現金價": 132000, "單購-分期價": 143000, "分期期數": 24, "管理費": 23000},
+                "3、5、8、9": {"定價": 260000, "加購-現金價": 120000, "單購-現金價": 156000, "單購-分期價": 169000, "分期期數": 24, "管理費": 23000},
+                "6、7": {"定價": 290000, "加購-現金價": 135000, "單購-現金價": 174000, "單購-分期價": 188500, "分期期數": 24, "管理費": 23000}
+            }
+        }
+
+    def _init_down_payments(self):
+        """初始化頭款金額（只保留分期購買的頭款）"""
+        return {
+            "澤茵園": {
+                "單人位": {"分期價": 88560},
+                "貴族2人": {"分期價": 118320},
+                "家福4人": {"分期價": 180900},
+                "家族6人": {"分期價": 247800}
+            },
+            "聚賢閣": {
+                "12人": {"分期價": 399000},
+                "18人": {"分期價": 499800}
+            },
+            "寶祥家族": {
+                "6人": {"分期價": 306300},
+                "9人": {"分期價": 357000},
+                "15人": {"分期價": 420000}
+            },
+            "永願": {
+                "2人": {"分期價": 82560}
+            },
+            "永念": {
+                "2人": {"分期價": 38000}
+            },
+            "天地": {
+                "合人2人": {"分期價": 133760},
+                "圓融8人": {"分期價": 296400},
+                "福澤12人": {"分期價": 384000}
+            },
+            "恩典園一期": {
+                "安然2人": {"分期價": 68400},
+                "安然4人": {"分期價": 130360},
+                "安然特區4人": {"分期價": 165540},
+                "晨星2人": {"團購-分期價": 21000, "分期價": 38000}
+            },
+            "彌陀廳": {
+                "6、9": {"單購-分期價": 42920},
+                "7、8": {"單購-分期價": 46800}
+            },
+            "大佛廳": {
+                "1、2、10、11": {"單購-分期價": 42920},
+                "3、5、8、9": {"單購-分期價": 50680},
+                "6、7": {"單購-分期價": 56500}
+            }
+        }
+
+    def _init_management_down_payments(self):
+        """初始化管理費頭款"""
+        return {
+            "澤茵園": {
+                "單人位": {"分期價": 16600},
+                "貴族2人": {"分期價": 22100},
+                "家福4人": {"分期價": 31700},
+                "家族6人": {"分期價": 46000}
+            },
+            "聚賢閣": {
+                "12人": {"分期價": 76000},
+                "18人": {"分期價": 87400}
+            },
+            "寶祥家族": {
+                "6人": {"分期價": 60000},
+                "9人": {"分期價": 72800},
+                "15人": {"分期價": 87800}
+            },
+            "永願": {
+                "2人": {"分期價": 14700}
+            },
+             "永念": {
+                "2人": {"分期價": 6600}
+            },
+            "天地": {
+                "合人2人": {"分期價": 27300},
+                "圓融8人": {"分期價": 66800},
+                "福澤12人": {"分期價": 78700}
+            },
+            "恩典園一期": {
+                "安然2人": {"分期價": 11800},
+                "安然4人": {"分期價": 23600},
+                "安然特區4人": {"分期價": 31700},
+                "晨星2人": {"團購-分期價": 6600, "分期價": 6600}
+            },
+            "大佛廳": {
+                "1、2、10、11": {"單購-分期價": 23000},
+                "3、5、8、9": {"單購-分期價": 23000},
+                "6、7": {"單購-分期價": 23000}
+            },
+            "彌陀廳": {
+                "6、9": {"單購-分期價": 23000},
+                "7、8": {"單購-分期價": 23000}
+            }
+        }
+
+    def get_down_payment(self, category, spec, product_price, price_type, quantity):
+        """取得頭款金額"""
+        if '現金' in price_type:
+            return product_price
+        else:
+             return self.down_payments[category][spec][price_type] * quantity
+
+    def get_management_down_payment(self, category, spec, management_fee, price_type, quantity):
+        """取得管理費頭款"""
+        if '現金' in price_type:
+            return management_fee
+        else:
+            return self.management_down_payments[category][spec][price_type] * quantity
+
+    def calculate_installment_payment(self, product_price, management_fee, installment_terms, down_payment_amount, management_down_payment_amount):
+        """計算分期付款"""
+        if not installment_terms:
+            return 0
+
+        total_price = product_price + management_fee
+        total_down_payment = down_payment_amount + management_down_payment_amount
+        monthly_payment = (total_price - total_down_payment) / installment_terms
+
+        return monthly_payment
+
+    def calculate_product_installment_payment(self, product_price, installment_terms, down_payment_amount):
+        """計算產品分期付款"""
+        if not installment_terms:
+            return 0
+
+        monthly_payment = (product_price - down_payment_amount) / installment_terms
+        return monthly_payment
+
+    def calculate_management_installment_payment(self, management_fee, installment_terms, management_down_payment_amount):
+        """計算管理費分期付款"""
+        if not installment_terms:
+            return 0
+
+        monthly_payment = (management_fee - management_down_payment_amount) / installment_terms
+        return monthly_payment
+
+    def calculate_total(self, selected_products):
+        total_original = 0
+        total_discounted = 0
+        total_management_fee = 0
+        total_down_payment = 0
+        total_management_down_payment = 0
+        product_details = []
+
+        for product in selected_products:
+            if product['type'] == 'cemetery':
+                product_data = self.cemetery_products[product['category']][product['spec']]
+            else:
+                product_data = self.memorial_products[product['category']][product['spec']]
+
+            quantity = product['quantity']
+            price_type = product['price_type']  # 現在直接是中文
+
+            # 直接使用中文 price_type 作為價格鍵值
+            product_price = product_data[price_type] * quantity
+            original_price = product_data['定價'] * quantity
+            # 修正：晨星團購價要抓團購管理費
+            if product['category'] == "恩典園一期" and product['spec'] == "晨星2人" and '團購' in price_type:
+                management_fee_per_unit = product_data.get('團購-管理費', 0)
+            else:
+                management_fee_per_unit = product_data.get('管理費', 0)
+
+            management_fee = management_fee_per_unit * quantity
+
+            # 計算產品頭款
+            product_down_payment = self.get_down_payment(product['category'], product['spec'], product_price, price_type, quantity)
+            total_down_payment += product_down_payment
+
+            # 計算管理費頭款
+            management_down_payment = self.get_management_down_payment(product['category'], product['spec'], management_fee, price_type, quantity)
+            total_management_down_payment += management_down_payment
+
+            # 計算總價
+            total_original += original_price
+            total_discounted += product_price
+            total_management_fee += management_fee
+
+            # 只有分期價才顯示分期期數
+            installment_terms = product_data.get('分期期數') if '分期' in price_type else None
+
+            # 計算產品期款和管理費期款
+            product_monthly_payment = 0
+            management_monthly_payment = 0
+
+            if '分期' in price_type and installment_terms:
+                product_monthly_payment = self.calculate_product_installment_payment(
+                    product_price, installment_terms, product_down_payment
+                )
+                management_monthly_payment = self.calculate_management_installment_payment(
+                    management_fee, installment_terms, management_down_payment
+                )
+
+            # 購買方式顯示
+            display_price_type = price_type
+            if '分期' in price_type and installment_terms:
+                display_price_type = f"{price_type}-{installment_terms}期"
+
+            product_details.append({
+                'category': product['category'],
+                'spec': product['spec'],
+                'quantity': quantity,
+                'price_type': display_price_type,
+                'original_price':original_price,
+                'product_price': product_price,
+                'management_fee_per_unit': management_fee_per_unit,
+                'management_fee': management_fee,
+                'installment_terms': installment_terms,
+                'product_down_payment': product_down_payment,
+                'product_monthly_payment': product_monthly_payment,
+                'management_down_payment': management_down_payment,
+                'management_monthly_payment': management_monthly_payment
+            })
+
+        discount_rate = (total_original - total_discounted) / total_original if total_original > 0 else 0
+        final_total = total_discounted + total_management_fee
+
+        return {
+            "total_original": total_original,
+            "total_discounted": total_discounted,
+            "total_management_fee": total_management_fee,
+            "total_down_payment": total_down_payment,
+            "total_management_down_payment": total_management_down_payment,
+            "discount_rate": discount_rate,
+            "final_total": final_total,
+            "product_details": product_details
+        }
 
 def format_currency(amount):
     if pd.isna(amount) or amount is None:
