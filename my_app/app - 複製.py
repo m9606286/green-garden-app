@@ -215,28 +215,7 @@ class AuthorizationSystem:
                         st.error("❌ 身份證字號未授權，請聯繫管理員")
                 else:
                     st.warning("⚠️ 請輸入身份證字號")
-        
-        # 顯示授權業務員清單（僅供參考）
-        with st.expander("📋 已授權業務員清單"):
-            if self.authorized_agents:
-                agent_list = []
-                for agent_id, info in self.authorized_agents.items():
-                    if info.get('status') == 'active':
-                        # 隱藏部分身份證字號以保護隱私
-                        masked_id = agent_id[:3] + '****' + agent_id[-3:]
-                        agent_list.append({
-                            '身份證字號': masked_id,
-                            '姓名': info['name'],
-                            '營業處': info.get('office', '')
-                        })
-                
-                if agent_list:
-                    st.dataframe(pd.DataFrame(agent_list), use_container_width=True)
-                else:
-                    st.info("暫無有效授權業務員")
-            else:
-                st.warning("無法載入授權清單")
-        
+               
         # 使用說明
         with st.expander("💡 使用說明"):
             st.markdown("""
