@@ -267,14 +267,14 @@ class GreenGardenProposal:
             }
         }
 
-    def get_down_payment(self, category, spec, price_type, quantity):
+    def get_down_payment(self, category, spec, product_price, price_type, quantity):
         """取得頭款金額"""
         if '現金' in price_type:
             return product_price
         else:
              return self.down_payments[category][spec][price_type] * quantity
 
-    def get_management_down_payment(self, category, spec, price_type, quantity):
+    def get_management_down_payment(self, category, spec, management_fee, price_type, quantity):
         """取得管理費頭款"""
         if '現金' in price_type:
             return management_fee
@@ -337,11 +337,11 @@ class GreenGardenProposal:
             management_fee = management_fee_per_unit * quantity
 
             # 計算產品頭款
-            product_down_payment = self.get_down_payment(product['category'], product['spec'], price_type, quantity)
+            product_down_payment = self.get_down_payment(product['category'], product['spec'], product_price, price_type, quantity)
             total_down_payment += product_down_payment
 
             # 計算管理費頭款
-            management_down_payment = self.get_management_down_payment(product['category'], product['spec'], price_type, quantity)
+            management_down_payment = self.get_management_down_payment(product['category'], product['spec'], management_fee, price_type, quantity)
             total_management_down_payment += management_down_payment
 
             # 計算總價
@@ -687,6 +687,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
