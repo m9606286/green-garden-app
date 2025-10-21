@@ -168,7 +168,7 @@ class AuthorizationSystem:
                 </div>
                 """, unsafe_allow_html=True)
         
-        st.title("🔐 業務系統登入")
+        st.title("🔐 規劃配置建議書系統登入")
         st.markdown('<p style="color: #666;">請輸入身份證字號進行驗證</p>', unsafe_allow_html=True)
         
         # 登入表單
@@ -811,6 +811,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
