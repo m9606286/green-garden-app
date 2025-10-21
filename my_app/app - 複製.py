@@ -110,14 +110,7 @@ st.markdown("""
         width: 50% !important;
         margin: 0 auto;
     }
-    .login-container {
-        max-width: 400px;
-        margin: 100px auto;
-        padding: 2rem;
-        border: 1px solid #ddd;
-        border-radius: 10px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -534,7 +527,7 @@ def main():
         # 自動填入專業顧問資訊（營業處 + 姓名）
         agent_info = st.session_state.agent_info
         office_name = agent_info.get('office', '')
-        consultant_display = f"{office_name}營業處-專業顧問：{agent_info['name']}"
+        consultant_display = f"{office_name}營業處-：{agent_info['name']}"
         st.text_input("專業顧問", value=consultant_display, disabled=True)
         
         contact_phone = st.text_input("聯絡電話", value="")
@@ -818,3 +811,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
