@@ -110,14 +110,7 @@ st.markdown("""
         width: 50% !important;
         margin: 0 auto;
     }
-    .login-container {
-        max-width: 400px;
-        margin: 100px auto;
-        padding: 2rem;
-        border: 1px solid #ddd;
-        border-radius: 10px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
+    
 </style>
 """, unsafe_allow_html=True)
 
@@ -833,4 +826,5 @@ def main():
            st.markdown(f'<div class="client-info-content"><strong>日期：</strong>{proposal_date.strftime("%Y-%m-%d")}</div>', unsafe_allow_html=True)
 
 if __name__ == "__main__":
+
     main()
