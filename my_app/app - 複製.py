@@ -151,7 +151,7 @@ class AuthorizationSystem:
                         'office': office,
                         'status': 'active'
                     }
-                st.success("✅ 授權名單載入成功")
+                #st.success("✅ 授權名單載入成功")
                 return authorized_dict
             else:
                 missing_cols = [col for col in required_columns if col not in df.columns]
