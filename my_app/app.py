@@ -327,7 +327,7 @@ class GreenGardenProposal:
 
             # 直接使用中文 price_type 作為價格鍵值
             product_price = product_data[price_type] * quantity
-
+            original_price = product_data['定價'] * quantity
             # 修正：晨星團購價要抓團購管理費
             if product['category'] == "恩典園一期" and product['spec'] == "晨星2人" and '團購' in price_type:
                 management_fee_per_unit = product_data.get('團購-管理費', 0)
@@ -345,7 +345,7 @@ class GreenGardenProposal:
             total_management_down_payment += management_down_payment
 
             # 計算總價
-            total_original += product_data['定價'] * quantity
+            total_original += original_price
             total_discounted += product_price
             total_management_fee += management_fee
 
@@ -374,7 +374,7 @@ class GreenGardenProposal:
                 'spec': product['spec'],
                 'quantity': quantity,
                 'price_type': display_price_type,
-                'original_price': product_data['定價'] * quantity,
+                'original_price':original_price,
                 'product_price': product_price,
                 'management_fee_per_unit': management_fee_per_unit,
                 'management_fee': management_fee,
@@ -687,6 +687,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
