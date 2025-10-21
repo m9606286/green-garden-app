@@ -124,7 +124,7 @@ st.markdown("""
 class AuthorizationSystem:
     def __init__(self, excel_url=None):
         # 預設的Excel檔案URL（放在GitHub上）
-        self.excel_url = excel_url or "https://raw.githubusercontent.com/m9606286/green-garden-app/main/authorized_agents.xlsx"
+        self.excel_url = excel_url or "https://raw.githubusercontent.com/m9606286/green-garden-app/main/在職業務名單.xlsx"
         self.authorized_agents = self.load_authorized_agents()
     
     def load_authorized_agents(self):
