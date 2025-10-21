@@ -188,7 +188,7 @@ class AuthorizationSystem:
                 </div>
                 """, unsafe_allow_html=True)
         
-        st.markdown('<div style="text-align: center; margin-bottom: 2rem;">', unsafe_allow_html=True)
+        #st.markdown('<div style="text-align: center; margin-bottom: 2rem;">', unsafe_allow_html=True)
         st.title("🔐 業務系統登入")
         st.markdown('<p style="color: #666;">請輸入身份證字號進行驗證</p>', unsafe_allow_html=True)
         st.markdown('</div>', unsafe_allow_html=True)
