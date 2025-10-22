@@ -567,7 +567,7 @@ def main():
         col1, col2, col3 = st.columns(3)
 
         with col1:
-            st.subheader("紀念園區")
+            st.subheader("園區")
             cemetery_type = st.selectbox("選擇園區",
                 ["請選擇", "澤茵園", "天璽文創園一期A區", "天意園一期", "恩典園一期"])
 
@@ -598,7 +598,7 @@ def main():
                         st.warning("此產品已存在於清單中")
 
         with col2:
-            st.subheader("紀念牌位")
+            st.subheader("牌位")
             memorial_type = st.selectbox("選擇廳別",
                 ["請選擇", "永願樓-普羅廳", "永願樓-彌陀廳", "永願樓-大佛廳"])
 
@@ -674,7 +674,7 @@ def main():
             simple_product_data = []
             for detail in totals['product_details']:
                 simple_product_data.append({
-                    '紀念空間': detail['category'],
+                    '追思空間': detail['category'],
                     '產品': detail['spec'],
                     '座數': detail['quantity'],
                     '購買方式': detail['price_type'],
@@ -693,7 +693,7 @@ def main():
             for detail in totals['product_details']:
                 if detail['installment_terms']:
                     installment_details.append({
-                        '紀念空間': detail['category'],
+                        '追思空間': detail['category'],
                         '產品': detail['spec'],
                         '座數': detail['quantity'],
                         '期數': f"{detail['installment_terms']}期",
@@ -798,6 +798,7 @@ def main():
 if __name__ == "__main__":
 
     main()
+
 
 
 
