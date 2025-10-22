@@ -674,7 +674,7 @@ def main():
             simple_product_data = []
             for detail in totals['product_details']:
                 simple_product_data.append({
-                    '園區-產品': f"{detail['category']} {detail['spec']}",
+                    '園區-產品': f"{detail['category']}-{detail['spec']}",
                     '座數': detail['quantity'],
                     '購買方式': detail['price_type'],
                     '定價': format_currency(detail['original_price']),
@@ -796,6 +796,7 @@ def main():
 if __name__ == "__main__":
 
     main()
+
 
 
 
