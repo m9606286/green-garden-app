@@ -599,7 +599,7 @@ def main():
 
         with col2:
             st.subheader("牌位產品")
-            memorial_type = st.selectbox("選擇牌位",
+            memorial_type = st.selectbox("選擇廳別",
                 ["請選擇", "永願樓-普羅廳", "永願樓-彌陀廳", "永願樓-大佛廳"])
 
             if memorial_type != "請選擇":
@@ -798,6 +798,7 @@ def main():
 if __name__ == "__main__":
 
     main()
+
 
 
 
