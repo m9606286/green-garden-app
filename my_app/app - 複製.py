@@ -692,7 +692,7 @@ def main():
             for detail in totals['product_details']:
                 if detail['installment_terms']:
                     installment_details.append({
-                        '園區-產品': f"{detail['category']}\n{detail['spec']}",
+                        '園區-產品': f"{detail['category']}-{detail['spec']}",
                         '座數': detail['quantity'],
                         '期數': f"{detail['installment_terms']}期",
                         '產品頭款': format_currency(detail['product_down_payment']),
@@ -796,6 +796,7 @@ def main():
 if __name__ == "__main__":
 
     main()
+
 
 
 
