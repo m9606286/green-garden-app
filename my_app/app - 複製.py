@@ -568,7 +568,7 @@ def main():
 
         with col1:
             st.subheader("墓園產品")
-            cemetery_type = st.selectbox("選擇園區",
+            cemetery_type = st.selectbox("選擇追思空間",
                 ["請選擇", "澤茵園", "天璽文創園一期A區", "天意園一期", "恩典園一期"])
 
             if cemetery_type != "請選擇":
@@ -674,7 +674,7 @@ def main():
             simple_product_data = []
             for detail in totals['product_details']:
                 simple_product_data.append({
-                    '園區': detail['category'],
+                    '追思空間': detail['category'],
                     '產品': detail['spec'],
                     '座數': detail['quantity'],
                     '購買方式': detail['price_type'],
@@ -693,7 +693,7 @@ def main():
             for detail in totals['product_details']:
                 if detail['installment_terms']:
                     installment_details.append({
-                        '園區': detail['category'],
+                        '追思空間': detail['category'],
                         '產品': detail['spec'],
                         '座數': detail['quantity'],
                         '期數': f"{detail['installment_terms']}期",
@@ -798,6 +798,7 @@ def main():
 if __name__ == "__main__":
 
     main()
+
 
 
 
