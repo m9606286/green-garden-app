@@ -600,13 +600,13 @@ def main():
         with col2:
             st.subheader("牌位產品")
             memorial_type = st.selectbox("選擇牌位類型",
-                ["請選擇", "普羅廳", "彌陀廳", "大佛廳"])
+                ["請選擇", "永願樓-普羅廳", "永願樓-彌陀廳", "永願樓-大佛廳"])
 
             if memorial_type != "請選擇":
                 spec = st.selectbox("層別", list(proposal_system.memorial_products[memorial_type].keys()), key=f"{memorial_type}_spec")
                 quantity = st.number_input("座數", min_value=1, max_value=10, value=1, key=f"{memorial_type}_quantity")
 
-                if memorial_type == '大佛廳' or (memorial_type == '彌陀廳' and spec in ["6、9", "7、8"]):
+                if memorial_type == '永願樓-大佛廳' or (memorial_type == '永願樓-彌陀廳' and spec in ["6、9", "7、8"]):
                     price_options = ["加購-現金價", "單購-現金價", "單購-分期價"]
                 else:
                     price_options = ["加購-現金價", "單購-現金價"]
@@ -798,6 +798,7 @@ def main():
 if __name__ == "__main__":
 
     main()
+
 
 
 
