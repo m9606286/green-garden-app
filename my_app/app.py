@@ -125,6 +125,10 @@ st.markdown("""
         margin-bottom: 1rem;
         border-left: 4px solid #2E8B57;
     }
+    .selected-row {
+        background-color: #e6f3ff !important;
+        border: 2px solid #007bff !important;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -252,7 +256,11 @@ class ClientManagementSystem:
         """更新客戶資料"""
         for i, client in enumerate(st.session_state.clients):
             if client['client_id'] == client_id:
-                st.session_state.clients[i].update(updated_data)
+                # 保留原有的 client_id 和建檔日期
+                updated_data['client_id'] = client_id
+                updated_data['建檔日期'] = client['建檔日期']
+                updated_data['聯絡次數'] = client['聯絡次數']
+                st.session_state.clients[i] = updated_data
                 break
     
     def delete_client(self, client_id):
@@ -276,6 +284,27 @@ class ClientManagementSystem:
                 if client['client_id'] == client_id:
                     client['聯絡次數'] = len(st.session_state.contact_records[client_id])
                     break
+    
+    def update_contact_record(self, client_id, record_index, contact_date, record):
+        """更新聯絡紀錄"""
+        if client_id in st.session_state.contact_records:
+            if 0 <= record_index < len(st.session_state.contact_records[client_id]):
+                st.session_state.contact_records[client_id][record_index] = {
+                    '聯絡日期': contact_date,
+                    '聯絡紀錄': record
+                }
+    
+    def delete_contact_record(self, client_id, record_index):
+        """刪除聯絡紀錄"""
+        if client_id in st.session_state.contact_records:
+            if 0 <= record_index < len(st.session_state.contact_records[client_id]):
+                st.session_state.contact_records[client_id].pop(record_index)
+                
+                # 更新聯絡次數
+                for client in st.session_state.clients:
+                    if client['client_id'] == client_id:
+                        client['聯絡次數'] = len(st.session_state.contact_records[client_id])
+                        break
     
     def add_proposal(self, client_id, proposal_data):
         """新增建議書"""
@@ -604,36 +633,44 @@ def main():
     if 'current_client_id' not in st.session_state:
         st.session_state.current_client_id = None
     if 'current_page' not in st.session_state:
-        st.session_state.current_page = "客戶資料"
+        st.session_state.current_page = "新增客戶資料"
     if 'editing_client' not in st.session_state:
         st.session_state.editing_client = None
+    if 'selected_client_id' not in st.session_state:
+        st.session_state.selected_client_id = None
+    if 'editing_contact_index' not in st.session_state:
+        st.session_state.editing_contact_index = None
 
     # 側邊欄
     with st.sidebar:
         # 基本資訊
-        st.header("基本資訊")
+        st.header("導航選單")
         
         # 頁面選擇
-        page = st.radio("選擇頁面", ["客戶資料", "規劃配置建議書"], key="page_selector")
+        page = st.radio("選擇頁面", ["新增客戶資料", "客戶列表", "規劃配置建議書"], key="page_selector")
         st.session_state.current_page = page
         
         if page == "規劃配置建議書":
             # 客戶選擇
             clients = st.session_state.clients
-            client_options = ["請選擇客戶"] + [f"{client['客戶姓名']} ({client['client_id']})" for client in clients]
-            selected_client = st.selectbox("選擇客戶", client_options)
-            
-            if selected_client != "請選擇客戶":
-                client_id = selected_client.split("(")[1].replace(")", "")
-                st.session_state.current_client_id = client_id
+            if clients:
+                client_options = ["請選擇客戶"] + [f"{client['客戶姓名']}" for client in clients]
+                selected_client = st.selectbox("選擇客戶", client_options, key="client_selector")
                 
-                # 顯示選中客戶的基本資訊
-                current_client = next((client for client in clients if client['client_id'] == client_id), None)
-                if current_client:
-                    st.info(f"**當前客戶:** {current_client['客戶姓名']}")
-                    st.info(f"**手機:** {current_client.get('手機號碼', '')}")
-            
-            client_name = st.text_input("客戶姓名", value="")
+                if selected_client != "請選擇客戶":
+                    # 找到對應的客戶
+                    current_client = next((client for client in clients if client['客戶姓名'] == selected_client), None)
+                    if current_client:
+                        st.session_state.current_client_id = current_client['client_id']
+                        st.session_state.client_name = current_client['客戶姓名']
+                        st.session_state.contact_phone = current_client.get('手機號碼', '')
+                        
+                        # 顯示選中客戶的基本資訊
+                        st.info(f"**當前客戶:** {current_client['客戶姓名']}")
+                        st.info(f"**手機:** {current_client.get('手機號碼', '')}")
+            else:
+                st.warning("尚未建立任何客戶資料")
+                st.session_state.current_client_id = None
             
             # 自動填入專業顧問資訊（營業處 + 姓名）
             agent_info = st.session_state.agent_info
@@ -641,8 +678,12 @@ def main():
             consultant_display = f"{office_name}-{agent_info['name']}"
             st.text_input("專業顧問", value=consultant_display, disabled=True)
             
-            contact_phone = st.text_input("聯絡電話", value="")
+            contact_phone = st.text_input("聯絡電話", value=st.session_state.get('contact_phone', ''))
             proposal_date = st.date_input("日期", value=datetime.now())
+            
+            # 更新 session state
+            st.session_state.contact_phone = contact_phone
+            st.session_state.proposal_date = proposal_date
         
         # 登出按鈕放在底部
         st.markdown("---")
@@ -653,13 +694,15 @@ def main():
             st.rerun()
 
     # 主內容區域
-    if st.session_state.current_page == "客戶資料":
-        display_client_management(client_system, proposal_system)
+    if st.session_state.current_page == "新增客戶資料":
+        display_add_client(client_system)
+    elif st.session_state.current_page == "客戶列表":
+        display_client_list(client_system)
     else:
         display_proposal_system(client_system, proposal_system)
 
-def display_client_management(client_system, proposal_system):
-    """顯示客戶資料管理頁面"""
+def display_add_client(client_system):
+    """顯示新增客戶資料頁面"""
     st.markdown('<div class="header-container">', unsafe_allow_html=True)
     
     col1, col2, col3 = st.columns([1, 2, 1])
@@ -677,70 +720,101 @@ def display_client_management(client_system, proposal_system):
     with col2:
         st.markdown(f"""
         <div class="title-container">
-            <h1 class="main-title" style="font-size: 1.5rem;">客戶資料管理</h1>
+            <h1 class="main-title" style="font-size: 1.5rem;">新增客戶資料</h1>
         </div>
         """, unsafe_allow_html=True)
     
     st.markdown('</div>', unsafe_allow_html=True)
     
     # 新增客戶表單
-    with st.expander("📝 新增客戶", expanded=st.session_state.editing_client is None):
-        with st.form("add_client_form"):
-            col1, col2 = st.columns(2)
-            
-            with col1:
-                client_name = st.text_input("客戶姓名*", value="")
-                gender = st.selectbox("性別*", ["請選擇", "男", "女"])
-                relationship = st.selectbox("關係*", ["請選擇", "朋友", "親戚", "同事", "其他"])
-                birthday = st.date_input("生日", value=None)
-                address = st.text_input("居住地址", value="")
-            
-            with col2:
-                mobile = st.text_input("手機號碼*", value="")
-                email = st.text_input("e-mail", value="")
-                status = st.selectbox("目前狀況*", ["請選擇", "尚未聯絡", "已聯絡", "已成交", "拒絕"])
-            
-            col1, col2 = st.columns(2)
-            with col1:
-                if st.form_submit_button("💾 存檔", use_container_width=True):
-                    if client_name and gender != "請選擇" and relationship != "請選擇" and mobile and status != "請選擇":
-                        client_data = {
-                            '客戶姓名': client_name,
-                            '性別': gender,
-                            '關係': relationship,
-                            '生日': birthday.strftime("%Y/%m/%d") if birthday else "",
-                            '居住地址': address,
-                            '手機號碼': mobile,
-                            'e-mail': email,
-                            '目前狀況': status
-                        }
-                        
-                        if st.session_state.editing_client:
-                            # 編輯現有客戶
-                            client_system.update_client(st.session_state.editing_client, client_data)
-                            st.success(f"✅ 已更新客戶 {client_name} 的資料")
-                            st.session_state.editing_client = None
-                        else:
-                            # 新增客戶
-                            client_id = client_system.add_client(client_data)
-                            st.success(f"✅ 已新增客戶 {client_name}")
-                        
-                        st.rerun()
-                    else:
-                        st.error("❌ 請填寫所有必填欄位（標示*）")
-            
-            with col2:
-                if st.form_submit_button("❌ 取消", use_container_width=True):
-                    st.session_state.editing_client = None
-                    st.rerun()
+    with st.form("add_client_form"):
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            client_name = st.text_input("客戶姓名*", value="")
+            gender = st.selectbox("性別*", ["請選擇", "男", "女"])
+            relationship = st.selectbox("關係*", ["請選擇", "朋友", "親戚", "同事", "其他"])
+            # 生日從1900年開始
+            birthday = st.date_input("生日", value=None, min_value=datetime(1900, 1, 1), max_value=datetime.now())
+            address = st.text_input("居住地址", value="")
+        
+        with col2:
+            mobile = st.text_input("手機號碼*", value="")
+            email = st.text_input("e-mail", value="")
+            status = st.selectbox("目前狀況*", ["請選擇", "尚未聯絡", "已聯絡", "已成交", "拒絕"])
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            submit_button = st.form_submit_button("💾 存檔", use_container_width=True)
+        
+        with col2:
+            if st.form_submit_button("❌ 取消", use_container_width=True):
+                st.rerun()
+        
+        if submit_button:
+            if client_name and gender != "請選擇" and relationship != "請選擇" and mobile and status != "請選擇":
+                client_data = {
+                    '客戶姓名': client_name,
+                    '性別': gender,
+                    '關係': relationship,
+                    '生日': birthday.strftime("%Y/%m/%d") if birthday else "",
+                    '居住地址': address,
+                    '手機號碼': mobile,
+                    'e-mail': email,
+                    '目前狀況': status
+                }
+                
+                client_id = client_system.add_client(client_data)
+                st.success(f"✅ 已新增客戶 {client_name}")
+                st.rerun()
+            else:
+                st.error("❌ 請填寫所有必填欄位（標示*）")
+
+def display_client_list(client_system):
+    """顯示客戶列表頁面"""
+    st.markdown('<div class="header-container">', unsafe_allow_html=True)
     
-    # 客戶列表
-    st.markdown("### 客戶列表")
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col1:
+        try:
+            image_url = "https://raw.githubusercontent.com/m9606286/green-garden-app/main/my_app/綠金園.png"
+            st.image(image_url, width=120)
+        except:
+            st.markdown("""
+            <div style="width: 120px; height: 120px; background: #2E8B57; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 16px;">
+                綠金園
+            </div>
+            """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown(f"""
+        <div class="title-container">
+            <h1 class="main-title" style="font-size: 1.5rem;">客戶列表</h1>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    st.markdown('</div>', unsafe_allow_html=True)
+    
+    # 客戶篩選
+    st.markdown("### 客戶篩選")
+    search_name = st.text_input("輸入客戶姓名篩選", value="")
+    
+    # 操作按鈕區域
+    st.markdown("### 客戶操作")
     
     if st.session_state.clients:
+        # 篩選客戶
+        filtered_clients = st.session_state.clients
+        if search_name:
+            filtered_clients = [client for client in filtered_clients if search_name.lower() in client['客戶姓名'].lower()]
+        
+        if not filtered_clients:
+            st.info("沒有符合條件的客戶")
+            return
+        
         # 轉換為 DataFrame 以便顯示
         client_data = []
-        for client in st.session_state.clients:
+        for client in filtered_clients:
             client_data.append({
                 '建檔日期': client.get('建檔日期', ''),
                 '客戶姓名': client.get('客戶姓名', ''),
@@ -760,55 +834,75 @@ def display_client_management(client_system, proposal_system):
         df = pd.DataFrame(client_data)
         
         # 顯示客戶表格
+        st.markdown("### 客戶明細表")
         st.markdown('<div class="client-table">', unsafe_allow_html=True)
-        edited_df = st.dataframe(
-            df.drop(columns=['client_id']),
-            use_container_width=True,
-            hide_index=True
-        )
+        
+        # 建立可選擇的數據框
+        for i, client in enumerate(filtered_clients):
+            col1, col2, col3, col4, col5 = st.columns([3, 2, 2, 2, 2])
+            with col1:
+                is_selected = st.checkbox(
+                    f"{client['客戶姓名']} - {client['手機號碼']}", 
+                    key=f"client_{client['client_id']}",
+                    value=(st.session_state.selected_client_id == client['client_id'])
+                )
+                if is_selected:
+                    st.session_state.selected_client_id = client['client_id']
+                    st.session_state.selected_client = client
+            
+            with col2:
+                st.write(f"性別: {client['性別']}")
+            with col3:
+                st.write(f"關係: {client['關係']}")
+            with col4:
+                st.write(f"狀態: {client['目前狀況']}")
+            with col5:
+                st.write(f"聯絡次數: {client['聯絡次數']}")
+        
         st.markdown('</div>', unsafe_allow_html=True)
         
         # 操作按鈕
-        st.markdown("### 客戶操作")
-        col1, col2, col3, col4, col5 = st.columns(5)
+        if st.session_state.selected_client_id:
+            selected_client = st.session_state.selected_client
+            
+            col1, col2, col3, col4 = st.columns(4)
+            
+            with col1:
+                if st.button("✏️ 編輯客戶", use_container_width=True):
+                    st.session_state.editing_client = selected_client
+                    st.session_state.current_page = "新增客戶資料"
+                    st.rerun()
+            
+            with col2:
+                if st.button("🗑️ 刪除客戶", use_container_width=True):
+                    client_system.delete_client(selected_client['client_id'])
+                    st.session_state.selected_client_id = None
+                    st.session_state.selected_client = None
+                    st.success(f"✅ 已刪除客戶 {selected_client['客戶姓名']}")
+                    st.rerun()
+            
+            with col3:
+                if st.button("📞 聯絡紀錄", use_container_width=True):
+                    st.session_state.viewing_contact_records = selected_client['client_id']
+                    st.rerun()
+            
+            with col4:
+                if st.button("📋 建立建議書", use_container_width=True):
+                    st.session_state.current_client_id = selected_client['client_id']
+                    st.session_state.client_name = selected_client['客戶姓名']
+                    st.session_state.contact_phone = selected_client.get('手機號碼', '')
+                    st.session_state.current_page = "規劃配置建議書"
+                    st.rerun()
         
-        with col1:
-            selected_index = st.number_input("選擇客戶編號", min_value=1, max_value=len(st.session_state.clients), value=1) - 1
-        
-        selected_client = st.session_state.clients[selected_index]
-        
-        with col2:
-            if st.button("✏️ 編輯客戶", use_container_width=True):
-                st.session_state.editing_client = selected_client['client_id']
-                st.rerun()
-        
-        with col3:
-            if st.button("🗑️ 刪除客戶", use_container_width=True):
-                client_system.delete_client(selected_client['client_id'])
-                st.success(f"✅ 已刪除客戶 {selected_client['客戶姓名']}")
-                st.rerun()
-        
-        with col4:
-            if st.button("📞 聯絡紀錄", use_container_width=True):
-                st.session_state.viewing_contact_records = selected_client['client_id']
-                st.rerun()
-        
-        with col5:
-            if st.button("📋 建立建議書", use_container_width=True):
-                st.session_state.current_client_id = selected_client['client_id']
-                st.session_state.current_page = "規劃配置建議書"
-                st.rerun()
+        else:
+            st.info("請選擇一個客戶以進行操作")
         
         # 聯絡紀錄下鑽
         if hasattr(st.session_state, 'viewing_contact_records'):
-            display_contact_records(client_system, selected_client)
+            display_contact_records(client_system, st.session_state.selected_client)
         
-        # 建議書下鑽
-        if hasattr(st.session_state, 'viewing_proposals'):
-            display_client_proposals(client_system, selected_client)
-            
     else:
-        st.info("尚未有任何客戶資料，請使用上方表單新增客戶。")
+        st.info("尚未有任何客戶資料，請到「新增客戶資料」頁面新增客戶。")
 
 def display_contact_records(client_system, client):
     """顯示聯絡紀錄"""
@@ -818,59 +912,81 @@ def display_contact_records(client_system, client):
     client_id = client['client_id']
     contact_records = client_system.get_client_contact_records(client_id)
     
-    # 新增聯絡紀錄表單
-    with st.form("add_contact_record_form"):
+    # 新增/編輯聯絡紀錄表單
+    with st.form("contact_record_form"):
         col1, col2 = st.columns([1, 3])
         
         with col1:
             contact_date = st.date_input("聯絡日期", value=datetime.now())
         
         with col2:
-            contact_record = st.text_area("聯絡紀錄", placeholder="請詳細記錄與客戶的聯絡內容...", height=100)
+            contact_record = st.text_area("聯絡紀錄", placeholder="請詳細記錄與客戶的聯絡內容...", height=100, key="contact_record_input")
         
-        if st.form_submit_button("💾 新增聯絡紀錄", use_container_width=True):
-            if contact_record:
-                client_system.add_contact_record(client_id, contact_date.strftime("%Y/%m/%d"), contact_record)
-                st.success("✅ 已新增聯絡紀錄")
+        col1, col2 = st.columns(2)
+        with col1:
+            if st.session_state.editing_contact_index is not None:
+                submit_label = "💾 更新聯絡紀錄"
+            else:
+                submit_label = "💾 新增聯絡紀錄"
+            
+            submit_button = st.form_submit_button(submit_label, use_container_width=True)
+        
+        with col2:
+            if st.form_submit_button("❌ 取消", use_container_width=True):
+                st.session_state.editing_contact_index = None
                 st.rerun()
+        
+        if submit_button:
+            if contact_record:
+                if st.session_state.editing_contact_index is not None:
+                    # 更新現有紀錄
+                    client_system.update_contact_record(
+                        client_id, 
+                        st.session_state.editing_contact_index,
+                        contact_date.strftime("%Y/%m/%d"), 
+                        contact_record
+                    )
+                    st.session_state.editing_contact_index = None
+                    st.success("✅ 已更新聯絡紀錄")
+                else:
+                    # 新增紀錄
+                    client_system.add_contact_record(client_id, contact_date.strftime("%Y/%m/%d"), contact_record)
+                    st.success("✅ 已新增聯絡紀錄")
+                    # 清空輸入框
+                    st.rerun()
             else:
                 st.error("❌ 請填寫聯絡紀錄內容")
     
     # 顯示聯絡紀錄列表
     if contact_records:
         for i, record in enumerate(contact_records):
-            st.markdown(f"""
-            <div class="contact-record">
-                <strong>聯絡日期：</strong>{record['聯絡日期']}<br>
-                <strong>聯絡紀錄：</strong>{record['聯絡紀錄']}
-            </div>
-            """, unsafe_allow_html=True)
+            col1, col2, col3 = st.columns([3, 1, 1])
+            with col1:
+                st.markdown(f"""
+                <div class="contact-record">
+                    <strong>聯絡日期：</strong>{record['聯絡日期']}<br>
+                    <strong>聯絡紀錄：</strong>{record['聯絡紀錄']}
+                </div>
+                """, unsafe_allow_html=True)
+            
+            with col2:
+                if st.button("✏️ 編輯", key=f"edit_contact_{i}", use_container_width=True):
+                    st.session_state.editing_contact_index = i
+                    st.rerun()
+            
+            with col3:
+                if st.button("🗑️ 刪除", key=f"delete_contact_{i}", use_container_width=True):
+                    client_system.delete_contact_record(client_id, i)
+                    st.success("✅ 已刪除聯絡紀錄")
+                    st.rerun()
     else:
         st.info("尚未有任何聯絡紀錄")
     
     if st.button("⬅️ 返回客戶列表", use_container_width=True):
         if hasattr(st.session_state, 'viewing_contact_records'):
             del st.session_state.viewing_contact_records
-        st.rerun()
-
-def display_client_proposals(client_system, client):
-    """顯示客戶建議書"""
-    st.markdown("---")
-    st.markdown(f"### 📋 客戶建議書 - {client['客戶姓名']}")
-    
-    client_id = client['client_id']
-    proposals = client_system.get_client_proposals(client_id)
-    
-    if proposals:
-        for i, proposal in enumerate(proposals):
-            with st.expander(f"建議書 {i+1} - {proposal.get('建議書日期', '')} - 總金額: {format_currency(proposal.get('建議書金額(含管)', 0))}"):
-                st.json(proposal)  # 這裡可以根據需要顯示建議書的詳細內容
-    else:
-        st.info("尚未為此客戶建立任何建議書")
-    
-    if st.button("⬅️ 返回客戶列表", use_container_width=True):
-        if hasattr(st.session_state, 'viewing_proposals'):
-            del st.session_state.viewing_proposals
+        if hasattr(st.session_state, 'editing_contact_index'):
+            st.session_state.editing_contact_index = None
         st.rerun()
 
 def display_proposal_system(client_system, proposal_system):
@@ -893,7 +1009,7 @@ def display_proposal_system(client_system, proposal_system):
     with col2:
         client_name = st.session_state.get('client_name', '')
         if client_name:
-            page_title = f"客戶{client_name}-規劃配置建議書"
+            page_title = f"客戶 {client_name} - 規劃配置建議書"
         else:
             page_title = "規劃配置建議書"
 
