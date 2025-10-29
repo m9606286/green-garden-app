@@ -194,7 +194,7 @@ class AuthorizationSystem:
                 else:
                     st.warning("⚠️ 請輸入身份證字號")
                
-        # 使用說明
+        # 使用說明(如較長時間未使用，系統會自動休眠，點選藍色長框(Yes, get this app back up!)即可喚醒)
         with st.expander("💡 使用說明"):
             st.markdown("""
             **登入說明頁面：**
@@ -206,7 +206,7 @@ class AuthorizationSystem:
             1. 於左側輸入基本資訊：客戶姓名、聯絡電話、日期(預設為今日)。
             2. 於**產品選擇**中，選取欲為客戶規劃的產品後，點選**方案詳情**，系統將自動產生建議書。
             3. 點選左上角 **<<** 收合後，再於右上角點選 **⋮** ，選擇 Print 列印建議書。如內容較多超出一頁，請將紙張大小設定為 Legal 或 Tabloid。
-            """)
+            """)            
         
         st.markdown('</div>', unsafe_allow_html=True)
         st.stop()
@@ -798,6 +798,7 @@ def main():
 if __name__ == "__main__":
 
     main()
+
 
 
 
