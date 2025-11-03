@@ -116,29 +116,56 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-SUPABASE_URL = "https://mjeuffynvchuongdboji.supabase.co"
-SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1qZXVmZnludmNodW9uZ2Rib2ppIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE3MDY1OTAsImV4cCI6MjA3NzI4MjU5MH0.7TTNk9k652fIXcereEqNyDj_ztHWVmgYZjxL8jocgj8"
-supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+def get_supabase(): 
+    url = st.secrets["https://mjeuffynvchuongdboji.supabase.co"]
+    key = st.secrets["eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1qZXVmZnludmNodW9uZ2Rib2ppIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE3MDY1OTAsImV4cCI6MjA3NzI4MjU5MH0.7TTNk9k652fIXcereEqNyDj_ztHWVmgYZjxL8jocgj8"]
+    return create_client(url, key)
 
-def load_customers():
-    # 抓取 customers 表的全部欄位
-    response = supabase.table("customers").select("*").execute()
-    
-    if response.data:
-        df = pd.DataFrame(response.data)        
-         # 處理顯示欄位
-        df['contact_count'] = df['contact_times'].apply(lambda x: len(x) if x else 0)
-        df['latest_proposal_date'] = df['latest_proposal'].apply(lambda x: list(x.keys())[0] if x else "")
-        df['latest_proposal_amount'] = df['latest_proposal'].apply(lambda x: list(x.values())[0]['total_amount'] if x else 0)
-        return df    
-    return pd.DataFrame()
-    
-def load_latest_proposal(customer_id):
-    response = supabase.table("customers").select("latest_proposal").eq("id", customer_id).single().execute()
-    if response.data and response.data.get("latest_proposal"):
-        return response.data["latest_proposal"]
-    return None
+# ---------- Customers CRUD ----------
+def fetch_customers() -> List[Dict]:
+    supabase = get_supabase()
+    resp = supabase.table("customers").select("*").order("id", desc=False).execute()
+    if resp.status_code == 200:
+        return resp.data
+    else:
+        return []
 
+def create_customer(customer: Dict) -> Optional[Dict]:
+    supabase = get_supabase()
+    resp = supabase.table("customers").insert(customer).execute()
+    return resp.data[0] if resp.status_code == 201 or resp.status_code == 200 else None
+
+def update_customer(customer_id: int, updates: Dict) -> bool:
+    supabase = get_supabase()
+    resp = supabase.table("customers").update(updates).eq("id", customer_id).execute()
+    return resp.status_code == 200
+
+def delete_customer(customer_id: int) -> bool:
+    supabase = get_supabase()
+    resp = supabase.table("customers").delete().eq("id", customer_id).execute()
+    return resp.status_code == 200
+
+# ---------- Contact logs ----------
+def fetch_contact_logs(contact_id: int):
+    supabase = get_supabase()
+    resp = supabase.table("contact_logs").select("*").eq("contact_id", contact_id).order("contact_date", desc=True).execute()
+    return resp.data if resp.status_code == 200 else []
+
+def create_contact_log(contact_id: int, note: str, created_by: str = None):
+    supabase = get_supabase()
+    payload = {"contact_id": contact_id, "note": note, "created_by": created_by}
+    resp = supabase.table("contact_logs").insert(payload).execute()
+    return resp.data[0] if resp.status_code == 201 or resp.status_code == 200 else None
+
+def update_contact_log(log_id: int, updates: Dict):
+    supabase = get_supabase()
+    resp = supabase.table("contact_logs").update(updates).eq("id", log_id).execute()
+    return resp.status_code == 200
+
+def delete_contact_log(log_id: int):
+    supabase = get_supabase()
+    resp = supabase.table("contact_logs").delete().eq("id", log_id).execute()
+    return resp.status_code == 200
 
 
 
@@ -830,6 +857,7 @@ def main():
 if __name__ == "__main__":
 
     main()
+
 
 
 
