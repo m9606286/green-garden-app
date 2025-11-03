@@ -124,7 +124,7 @@ def get_supabase():
 # ---------- Customers CRUD ----------
 def fetch_customers() -> List[Dict]:
     supabase = get_supabase()
-    resp = supabase.table("customers").select("*").order("id", desc=False).execute()
+    resp = supabase.table("customers").select("*").order("id", ascending=False).execute()
     if resp.status_code == 200:
         return resp.data
     else:
@@ -146,25 +146,25 @@ def delete_customer(customer_id: int) -> bool:
     return resp.status_code == 200
 
 # ---------- Contact logs ----------
-def fetch_contact_logs(contact_id: int):
+def fetch_contact_logs(customer_id: int):
     supabase = get_supabase()
-    resp = supabase.table("contact_logs").select("*").eq("contact_id", contact_id).order("contact_date", desc=True).execute()
+    resp = supabase.table("contact_logs").select("*").eq("id", customer_id).order("contact_date", ascending=False).execute()
     return resp.data if resp.status_code == 200 else []
 
-def create_contact_log(contact_id: int, note: str, created_by: str = None):
+def create_contact_log(customer_id: int, note: str, created_by: str = None):
     supabase = get_supabase()
-    payload = {"contact_id": contact_id, "note": note, "created_by": created_by}
+    payload = {"id": customer_id, "note": note, "agent_id": created_by}
     resp = supabase.table("contact_logs").insert(payload).execute()
     return resp.data[0] if resp.status_code == 201 or resp.status_code == 200 else None
 
 def update_contact_log(log_id: int, updates: Dict):
     supabase = get_supabase()
-    resp = supabase.table("contact_logs").update(updates).eq("id", log_id).execute()
+    resp = supabase.table("contact_logs").update(updates).eq("contact_id", log_id).execute()
     return resp.status_code == 200
 
 def delete_contact_log(log_id: int):
     supabase = get_supabase()
-    resp = supabase.table("contact_logs").delete().eq("id", log_id).execute()
+    resp = supabase.table("contact_logs").delete().eq("contact_id", log_id).execute()
     return resp.status_code == 200
 
 
@@ -857,6 +857,7 @@ def main():
 if __name__ == "__main__":
 
     main()
+
 
 
 
