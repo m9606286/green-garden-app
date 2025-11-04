@@ -117,8 +117,10 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 def get_supabase(): 
-    url = st.secrets["https://mjeuffynvchuongdboji.supabase.co"]
-    key = st.secrets["eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1qZXVmZnludmNodW9uZ2Rib2ppIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE3MDY1OTAsImV4cCI6MjA3NzI4MjU5MH0.7TTNk9k652fIXcereEqNyDj_ztHWVmgYZjxL8jocgj8"]
+    supabase_url = "https://mjeuffynvchuongdboji.supabase.co"
+    supabase_key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1qZXVmZnludmNodW9uZ2Rib2ppIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE3MDY1OTAsImV4cCI6MjA3NzI4MjU5MH0.7TTNk9k652fIXcereEqNyDj_ztHWVmgYZjxL8jocgj8"
+    url = st.secrets["supabase_url"]
+    key = st.secrets["supabase_key"]
     return create_client(url, key)
 
 # ---------- Customers CRUD ----------
@@ -882,6 +884,7 @@ def main():
 if __name__ == "__main__":
 
     main()
+
 
 
 
