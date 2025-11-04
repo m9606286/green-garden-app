@@ -619,9 +619,34 @@ def main():
         st.session_state.selected_products = []
 
     # 主內容區域 - 兩個標籤頁
-    tab1, tab2 = st.tabs(["🛒 產品選擇", "📋 方案詳情"])
-
+    tab1, tab2, tab3 = st.tabs(["🧑‍🤝‍🧑 客戶資料", "🛒 產品選擇", "📋 方案詳情"])
+    
     with tab1:
+        st.title("➕ 新增客戶")
+
+        with st.form("create_customer_form"):
+            name = st.text_input("客戶姓名")
+            phone = st.text_input("聯絡電話")
+            email = st.text_input("Email")
+
+            submitted = st.form_submit_button("✅ 儲存")
+
+            if submitted:
+                if not name:
+                    st.error("⚠️ 客戶姓名為必填")
+                else:
+                    created = create_customer({
+                        "customer_name": name,
+                        "phone": phone,
+                        "email": email
+                    })
+                    if created:
+                        st.success(f"✅ 客戶新增成功！（ID: {created['id']}）")
+                        st.rerun()  # 自動清空表單
+                    else:
+                        st.error("❌ 新增失敗")
+
+    with tab2:
         # 產品選擇
         col1, col2, col3 = st.columns(3)
 
@@ -705,7 +730,7 @@ def main():
             else:
                 st.info("尚未選擇任何產品")
 
-    with tab2:
+    with tab3:
         if st.session_state.selected_products:
             totals = proposal_system.calculate_total(st.session_state.selected_products)
 
@@ -857,6 +882,7 @@ def main():
 if __name__ == "__main__":
 
     main()
+
 
 
 
