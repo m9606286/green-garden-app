@@ -130,8 +130,9 @@ def fetch_customers():
     else:
         return []
 
-def create_customer(customer):
+def create_customer(customer_name, phone, email):
     supabase = get_supabase()
+    customer = {"customer_name": customer_name,"phone": phone,"email": email}
     resp = supabase.table("customers").insert(customer).execute()
     return resp.data[0] if resp.status_code == 201 or resp.status_code == 200 else None
 
@@ -882,6 +883,7 @@ def main():
 if __name__ == "__main__":
 
     main()
+
 
 
 
