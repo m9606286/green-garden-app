@@ -633,7 +633,7 @@ def main():
             submitted = st.form_submit_button("✅ 儲存")
 
             if submitted:
-                if not name:
+                if not customer_name:
                     st.error("⚠️ 客戶姓名為必填")
                 else:
                     created = create_customer({
@@ -883,6 +883,7 @@ def main():
 if __name__ == "__main__":
 
     main()
+
 
 
 
