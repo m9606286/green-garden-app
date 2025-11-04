@@ -122,7 +122,7 @@ def get_supabase():
     return create_client(url, key)
 
 # ---------- Customers CRUD ----------
-def fetch_customers() -> List[Dict]:
+def fetch_customers():
     supabase = get_supabase()
     resp = supabase.table("customers").select("*").order("id", ascending=False).execute()
     if resp.status_code == 200:
@@ -130,17 +130,17 @@ def fetch_customers() -> List[Dict]:
     else:
         return []
 
-def create_customer(customer: Dict) -> Optional[Dict]:
+def create_customer(customer: Dict):
     supabase = get_supabase()
     resp = supabase.table("customers").insert(customer).execute()
     return resp.data[0] if resp.status_code == 201 or resp.status_code == 200 else None
 
-def update_customer(customer_id: int, updates: Dict) -> bool:
+def update_customer(customer_id: int, updates: Dict):
     supabase = get_supabase()
     resp = supabase.table("customers").update(updates).eq("id", customer_id).execute()
     return resp.status_code == 200
 
-def delete_customer(customer_id: int) -> bool:
+def delete_customer(customer_id: int):
     supabase = get_supabase()
     resp = supabase.table("customers").delete().eq("id", customer_id).execute()
     return resp.status_code == 200
@@ -882,6 +882,7 @@ def main():
 if __name__ == "__main__":
 
     main()
+
 
 
 
