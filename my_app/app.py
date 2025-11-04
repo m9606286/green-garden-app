@@ -130,39 +130,39 @@ def fetch_customers():
     else:
         return []
 
-def create_customer(customer: Dict):
+def create_customer(customer):
     supabase = get_supabase()
     resp = supabase.table("customers").insert(customer).execute()
     return resp.data[0] if resp.status_code == 201 or resp.status_code == 200 else None
 
-def update_customer(customer_id: int, updates: Dict):
+def update_customer(customer_id, updates):
     supabase = get_supabase()
     resp = supabase.table("customers").update(updates).eq("id", customer_id).execute()
     return resp.status_code == 200
 
-def delete_customer(customer_id: int):
+def delete_customer(customer_id):
     supabase = get_supabase()
     resp = supabase.table("customers").delete().eq("id", customer_id).execute()
     return resp.status_code == 200
 
 # ---------- Contact logs ----------
-def fetch_contact_logs(customer_id: int):
+def fetch_contact_logs(customer_id):
     supabase = get_supabase()
     resp = supabase.table("contact_logs").select("*").eq("id", customer_id).order("contact_date", ascending=False).execute()
     return resp.data if resp.status_code == 200 else []
 
-def create_contact_log(customer_id: int, note: str, created_by: str = None):
+def create_contact_log(customer_id, note, created_by):
     supabase = get_supabase()
     payload = {"id": customer_id, "note": note, "agent_id": created_by}
     resp = supabase.table("contact_logs").insert(payload).execute()
     return resp.data[0] if resp.status_code == 201 or resp.status_code == 200 else None
 
-def update_contact_log(log_id: int, updates: Dict):
+def update_contact_log(log_id, updates):
     supabase = get_supabase()
     resp = supabase.table("contact_logs").update(updates).eq("contact_id", log_id).execute()
     return resp.status_code == 200
 
-def delete_contact_log(log_id: int):
+def delete_contact_log(log_id):
     supabase = get_supabase()
     resp = supabase.table("contact_logs").delete().eq("contact_id", log_id).execute()
     return resp.status_code == 200
@@ -882,6 +882,7 @@ def main():
 if __name__ == "__main__":
 
     main()
+
 
 
 
