@@ -133,12 +133,18 @@ def fetch_customers():
 def create_customer(customer_name, phone, email):
     supabase = get_supabase()
     customer = {"customer_name": customer_name,"phone": phone,"email": email}
-    resp = supabase.table("customers").insert(customer).execute()
-     # 檢查是否有 error
-    if resp.error:
-        print("Insert error:", resp.error)
+     try:
+        resp = supabase.table("customers").insert(customer).execute()
+
+        # resp.data 是 list，如果成功插入會有資料
+        if resp.data and len(resp.data) > 0:
+            return resp.data[0]
+        else:
+            return None
+
+    except Exception as e:
+        print("Insert error:", e)
         return None
-    return resp.data[0] if resp.data else None
 
 def update_customer(customer_id, updates):
     supabase = get_supabase()
@@ -883,6 +889,7 @@ def main():
 if __name__ == "__main__":
 
     main()
+
 
 
 
