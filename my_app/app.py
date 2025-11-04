@@ -133,7 +133,7 @@ def fetch_customers():
 def create_customer(customer_name, phone, email):
     supabase = get_supabase()
     customer = {"customer_name": customer_name,"phone": phone,"email": email}
-     try:
+    try:
         resp = supabase.table("customers").insert(customer).execute()
 
         # resp.data 是 list，如果成功插入會有資料
@@ -889,6 +889,7 @@ def main():
 if __name__ == "__main__":
 
     main()
+
 
 
 
