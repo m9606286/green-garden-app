@@ -626,7 +626,7 @@ def main():
         st.title("➕ 新增客戶")
 
         with st.form("create_customer_form"):
-            name = st.text_input("客戶姓名")
+            customer_name = st.text_input("客戶姓名")
             phone = st.text_input("聯絡電話")
             email = st.text_input("Email")
 
@@ -637,7 +637,7 @@ def main():
                     st.error("⚠️ 客戶姓名為必填")
                 else:
                     created = create_customer({
-                        "customer_name": name,
+                        "customer_name": customer_name,
                         "phone": phone,
                         "email": email
                     })
@@ -883,6 +883,7 @@ def main():
 if __name__ == "__main__":
 
     main()
+
 
 
 
