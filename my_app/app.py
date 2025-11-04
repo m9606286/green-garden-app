@@ -636,11 +636,7 @@ def main():
                 if not customer_name:
                     st.error("⚠️ 客戶姓名為必填")
                 else:
-                    created = create_customer({
-                        "customer_name": customer_name,
-                        "phone": phone,
-                        "email": email
-                    })
+                    created = create_customer(customer_name, phone, email)
                     if created:
                         st.success(f"✅ 客戶新增成功！（ID: {created['id']}）")
                         st.rerun()  # 自動清空表單
@@ -883,6 +879,7 @@ def main():
 if __name__ == "__main__":
 
     main()
+
 
 
 
