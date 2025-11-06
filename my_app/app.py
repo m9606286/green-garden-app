@@ -635,54 +635,64 @@ def main():
     
     with tab1:
         customers = fetch_customers()
-        df = pd.DataFrame(customers)
-        st.subheader("客戶清單")
-        # 顯示表格，可點選客戶
-        grid = AgGrid(
-        df,
+        # ============= 表格顯示 =============
+        gb = GridOptionsBuilder.from_dataframe(customers)
+        gb.configure_selection("single")  # 只允許單選
+        gridOptions = gb.build()
+        grid_response = AgGrid(
+        customers,
+        gridOptions=gridOptions,
         update_mode=GridUpdateMode.SELECTION_CHANGED,
-        fit_columns_on_grid_load=True,
-        height=250,)
-        selected = grid["selected_rows"]
-        selected_customer = selected[0] if selected else None
+        height=300,
+        theme="streamlit")
+        selected_rows = grid_response["selected_rows"]
+        selected_customer = selected_rows[0] if selected_rows else None
 
         # --- 按鈕列 --- #
         col1, col2, col3, col4, col5 = st.columns(5)
         if col1.button("➕ 新增客戶"):
-            with st.form("新增客戶"):
+            with st.modal("新增客戶"):
                 name = st.text_input("姓名")
                 phone = st.text_input("電話")
                 email = st.text_input("Email")
-                submitted = st.form_submit_button("✅ 確定新增")
-                if submitted:
-                    create_customer(customer_name, phone, email)
-                    st.success("已新增客戶")
-                    st.rerun()
+                if st.button("✅ 確定新增"):
+                     if not name:
+                         st.warning("姓名不可為空")
+                     else:
+                         create_customer(name, phone, email)
+                         st.success("已新增客戶")
+                         st.experimental_rerun()
+                         
         # 編輯
         if col2.button("✏️ 編輯客戶"):
+            selected_rows = AgGrid(
+                customers,
+                gridOptions=GridOptionsBuilder.from_dataframe(customers).build(),
+                update_mode=GridUpdateMode.SELECTION_CHANGED,
+                height=300,
+                theme="streamlit")["selected_rows"]
+            selected_customer = selected_rows[0] if selected_rows else None
             if not selected_customer:
                 st.warning("請先點選一位客戶")
             else:
-                 with st.form("編輯客戶"):
-                     name = st.text_input("姓名", selected_customer["customer_name"])
-                     phone = st.text_input("電話", selected_customer["phone"])
-                     email = st.text_input("Email", selected_customer["email"])
-                     submitted = st.form_submit_button("✅ 確定更新")
-                     if submitted:
-                         update_customer(selected_customer["id"], name, phone, email)
-                         st.success("已更新客戶")
-                         st.rerun()
-        # 刪除
-        if col3.button("🗑️ 刪除客戶"):
-            if not selected_customer:
-                st.warning("請先點選要刪除的客戶")
-        else:
-            delete_customer(selected_customer["id"])
-            st.success("已刪除客戶")
-            st.rerun()
-            
-        
-
+                with st.modal("編輯客戶"):
+                    name = st.text_input("姓名", selected_customer["customer_name"])
+                    phone = st.text_input("電話", selected_customer["phone"])
+                    email = st.text_input("Email", selected_customer["email"])
+                    if st.button("✅ 確定更新"):
+                        update_customer(selected_customer["id"], name, phone, email)
+                        st.success("已更新客戶")
+                        st.experimental_rerun()
+        # ====== 表格顯示 ====== #
+        gb = GridOptionsBuilder.from_dataframe(customers)
+        gb.configure_selection("single")
+        gridOptions = gb.build()
+        AgGrid(
+            customers,
+            gridOptions=gridOptions,
+            update_mode=GridUpdateMode.SELECTION_CHANGED,
+            height=300,
+            theme="streamlit")          
 
     with tab2:
         # 產品選擇
@@ -920,6 +930,7 @@ def main():
 if __name__ == "__main__":
 
     main()
+
 
 
 
