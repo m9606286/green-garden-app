@@ -125,10 +125,11 @@ def get_supabase():
 def fetch_customers():
     supabase = get_supabase()
     resp = supabase.table("customers").select("*").order("id", desc=True).execute()
-    if resp.status_code == 200:
-        return resp.data
-    else:
+    if resp.error:
+        st.error(f"Fetch customers failed: {resp.error.message}")
         return []
+    else:
+    return resp.data    
 
 def create_customer(customer_name, phone, email):
     supabase = get_supabase()
@@ -919,6 +920,7 @@ def main():
 if __name__ == "__main__":
 
     main()
+
 
 
 
