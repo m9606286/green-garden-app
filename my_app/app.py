@@ -667,10 +667,10 @@ def main():
                      phone = st.text_input("電話", selected_customer["phone"])
                      email = st.text_input("Email", selected_customer["email"])
                      submitted = st.form_submit_button("✅ 確定更新")
-                    if submitted:
-                        update_customer(selected_customer["id"], name, phone, email)
-                        st.success("已更新客戶")
-                        st.rerun()
+                     if submitted:
+                         update_customer(selected_customer["id"], name, phone, email)
+                         st.success("已更新客戶")
+                         st.rerun()
         # 刪除
         if col3.button("🗑️ 刪除客戶"):
             if not selected_customer:
@@ -919,6 +919,7 @@ def main():
 if __name__ == "__main__":
 
     main()
+
 
 
 
