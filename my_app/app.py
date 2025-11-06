@@ -6,7 +6,7 @@ from datetime import datetime
 import requests
 import io
 from st_aggrid import AgGrid, GridOptionsBuilder, GridUpdateMode
-st.write("Streamlit 版本:", st.__version__)
+#st.write("Streamlit 版本:", st.__version__)
 # 頁面配置
 st.set_page_config(
     page_title="規劃配置建議書",
@@ -640,8 +640,10 @@ def main():
             
         # --- 按鈕列 --- #
         col1, col2, col3, col4, col5 = st.columns(5)
+        popup = st.empty()  # 空容器
         if col1.button("➕ 新增客戶"):
-            with st.modal("新增客戶"):
+            with popup.container():
+                st.markdown("### 新增客戶")
                 name = st.text_input("姓名")
                 phone = st.text_input("電話")
                 email = st.text_input("Email")
@@ -651,6 +653,7 @@ def main():
                      else:
                          create_customer(name, phone, email)
                          st.success("已新增客戶")
+                         popup.empty()  # 關閉「彈窗」
                          st.experimental_rerun()
                          
         # 編輯
@@ -954,6 +957,7 @@ def main():
 if __name__ == "__main__":
 
     main()
+
 
 
 
