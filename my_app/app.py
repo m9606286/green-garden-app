@@ -124,7 +124,7 @@ def get_supabase():
 # ---------- Customers CRUD ----------
 def fetch_customers():
     supabase = get_supabase()
-    resp = supabase.table("customers").select("*").order("id", ascending=False).execute()
+    resp = supabase.table("customers").select("*").order("id", desc=True).execute()
     if resp.status_code == 200:
         return resp.data
     else:
@@ -159,7 +159,7 @@ def delete_customer(customer_id):
 # ---------- Contact logs ----------
 def fetch_contact_logs(customer_id):
     supabase = get_supabase()
-    resp = supabase.table("contact_logs").select("*").eq("id", customer_id).order("contact_date", ascending=False).execute()
+    resp = supabase.table("contact_logs").select("*").eq("id", customer_id).order("contact_date", desc=True).execute()
     return resp.data if resp.status_code == 200 else []
 
 def create_contact_log(customer_id, note, created_by):
@@ -919,6 +919,7 @@ def main():
 if __name__ == "__main__":
 
     main()
+
 
 
 
