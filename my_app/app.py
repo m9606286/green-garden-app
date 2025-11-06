@@ -633,25 +633,55 @@ def main():
     tab1, tab2, tab3 = st.tabs(["🧑‍🤝‍🧑 客戶資料", "🛒 產品選擇", "📋 方案詳情"])
     
     with tab1:
-        st.title("➕ 新增客戶")
+        customers = fetch_customers()
+        df = pd.DataFrame(customers)
+        st.subheader("客戶清單")
+        # 顯示表格，可點選客戶
+        grid = AgGrid(
+        df,
+        update_mode=GridUpdateMode.SELECTION_CHANGED,
+        fit_columns_on_grid_load=True,
+        height=250,)
+        selected = grid["selected_rows"]
+        selected_customer = selected[0] if selected else None
 
-        with st.form("create_customer_form"):
-            customer_name = st.text_input("客戶姓名")
-            phone = st.text_input("聯絡電話")
-            email = st.text_input("Email")
+        # --- 按鈕列 --- #
+        col1, col2, col3, col4, col5 = st.columns(5)
+        if col1.button("➕ 新增客戶"):
+            with st.form("新增客戶"):
+                name = st.text_input("姓名")
+                phone = st.text_input("電話")
+                email = st.text_input("Email")
+                submitted = st.form_submit_button("✅ 確定新增")
+                if submitted:
+                    create_customer(customer_name, phone, email)
+                    st.success("已新增客戶")
+                    st.rerun()
+        # 編輯
+        if col2.button("✏️ 編輯客戶"):
+            if not selected_customer:
+                st.warning("請先點選一位客戶")
+            else:
+                 with st.form("編輯客戶"):
+                     name = st.text_input("姓名", selected_customer["customer_name"])
+                     phone = st.text_input("電話", selected_customer["phone"])
+                     email = st.text_input("Email", selected_customer["email"])
+                     submitted = st.form_submit_button("✅ 確定更新")
+                    if submitted:
+                        update_customer(selected_customer["id"], name, phone, email)
+                        st.success("已更新客戶")
+                        st.rerun()
+        # 刪除
+        if col3.button("🗑️ 刪除客戶"):
+            if not selected_customer:
+                st.warning("請先點選要刪除的客戶")
+        else:
+            delete_customer(selected_customer["id"])
+            st.success("已刪除客戶")
+            st.rerun()
+            
+        
 
-            submitted = st.form_submit_button("✅ 儲存")
-
-            if submitted:
-                if not customer_name:
-                    st.error("⚠️ 客戶姓名為必填")
-                else:
-                    created = create_customer(customer_name, phone, email)
-                    if created:
-                        st.success(f"✅ 客戶新增成功！（ID: {created['id']}）")
-                        st.rerun()  # 自動清空表單
-                    else:
-                        st.error("❌ 新增失敗")
 
     with tab2:
         # 產品選擇
@@ -889,6 +919,7 @@ def main():
 if __name__ == "__main__":
 
     main()
+
 
 
 
