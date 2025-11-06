@@ -686,6 +686,7 @@ def main():
         # ====== 表格顯示 ====== #
         gb = GridOptionsBuilder.from_dataframe(customers)
         gb.configure_selection("single")
+        gridOptions = gb.build()
         grid_response = AgGrid(
             customers,
             gridOptions=gridOptions,
@@ -953,6 +954,7 @@ def main():
 if __name__ == "__main__":
 
     main()
+
 
 
 
