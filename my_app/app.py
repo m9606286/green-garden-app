@@ -693,9 +693,9 @@ def main():
             update_mode=GridUpdateMode.SELECTION_CHANGED,
             height=300,
             theme="streamlit") 
-         selected_rows = grid_response.get("selected_rows", [])
-         if selected_rows:
-             st.session_state.selected_customer = selected_rows[0]
+        selected_rows = grid_response.get("selected_rows", [])
+        if selected_rows:
+            st.session_state.selected_customer = selected_rows[0]
 
     # ===================== 顯示全部 客戶明細 (橫向) =====================
     st.subheader("📄 客戶明細")
@@ -954,6 +954,7 @@ def main():
 if __name__ == "__main__":
 
     main()
+
 
 
 
