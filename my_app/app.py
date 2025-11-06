@@ -129,7 +129,7 @@ def fetch_customers():
         st.error(f"Fetch customers failed: {resp.error.message}")
         return []
     else:
-    return resp.data    
+        return resp.data    
 
 def create_customer(customer_name, phone, email):
     supabase = get_supabase()
@@ -920,6 +920,7 @@ def main():
 if __name__ == "__main__":
 
     main()
+
 
 
 
