@@ -637,19 +637,7 @@ def main():
         customers = fetch_customers()
         if isinstance(customers, list):
             customers = pd.DataFrame(customers)
-        # ============= 表格顯示 =============
-        gb = GridOptionsBuilder.from_dataframe(customers)
-        gb.configure_selection("single")  # 只允許單選
-        gridOptions = gb.build()
-        grid_response = AgGrid(
-        customers,
-        gridOptions=gridOptions,
-        update_mode=GridUpdateMode.SELECTION_CHANGED,
-        height=300,
-        theme="streamlit")
-        selected_rows = grid_response["selected_rows"]
-        selected_customer = selected_rows[0] if selected_rows else None
-
+            
         # --- 按鈕列 --- #
         col1, col2, col3, col4, col5 = st.columns(5)
         if col1.button("➕ 新增客戶"):
@@ -685,6 +673,16 @@ def main():
                         update_customer(selected_customer["id"], name, phone, email)
                         st.success("已更新客戶")
                         st.experimental_rerun()
+        # 刪除
+        if col3.button("🗑 刪除客戶"):
+            if "selected_customer" not in st.session_state:
+                st.warning("請先選擇客戶")
+            else:
+                delete_customer(st.session_state.selected_customer["id"])
+                st.success("已刪除!")
+                st.experimental_rerun()
+
+        
         # ====== 表格顯示 ====== #
         gb = GridOptionsBuilder.from_dataframe(customers)
         gb.configure_selection("single")
@@ -694,7 +692,31 @@ def main():
             gridOptions=gridOptions,
             update_mode=GridUpdateMode.SELECTION_CHANGED,
             height=300,
-            theme="streamlit")          
+            theme="streamlit") 
+         selected_rows = grid_response.get("selected_rows", [])
+         if selected_rows:
+             st.session_state.selected_customer = selected_rows[0]
+
+    # ===================== 顯示全部 客戶明細 (橫向) =====================
+    st.subheader("📄 客戶明細")
+
+    # 欄位標題
+    header = st.columns([1, 2, 2, 3])
+    header[0].write("**ID**")
+    header[1].write("**姓名**")
+    header[2].write("**電話**")
+    header[3].write("**Email**")
+
+    st.markdown("---")
+
+    # 客戶資料逐筆橫向顯示
+    for _, row in customers.iterrows():
+        c1, c2, c3, c4 = st.columns([1, 2, 2, 3])
+        c1.write(row["id"])
+        c2.write(row["customer_name"])
+        c3.write(row["phone"])
+        c4.write(row["email"])
+        st.markdown("---")
 
     with tab2:
         # 產品選擇
@@ -932,6 +954,7 @@ def main():
 if __name__ == "__main__":
 
     main()
+
 
 
 
