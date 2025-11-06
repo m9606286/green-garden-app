@@ -635,6 +635,8 @@ def main():
     
     with tab1:
         customers = fetch_customers()
+        if isinstance(customers, list):
+            customers = pd.DataFrame(customers)
         # ============= 表格顯示 =============
         gb = GridOptionsBuilder.from_dataframe(customers)
         gb.configure_selection("single")  # 只允許單選
@@ -930,6 +932,7 @@ def main():
 if __name__ == "__main__":
 
     main()
+
 
 
 
