@@ -1,7 +1,6 @@
-streamlit
+streamlit==1.49.1
 pandas
 numpy
+FinMind
+tqdm
 matplotlib
-openpyxl
-streamlit-aggrid
-supabase
