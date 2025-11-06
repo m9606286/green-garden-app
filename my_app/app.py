@@ -6,7 +6,7 @@ from datetime import datetime
 import requests
 import io
 from st_aggrid import AgGrid, GridOptionsBuilder, GridUpdateMode
-
+st.write("Streamlit 版本:", st.__version__)
 # 頁面配置
 st.set_page_config(
     page_title="規劃配置建議書",
@@ -954,6 +954,7 @@ def main():
 if __name__ == "__main__":
 
     main()
+
 
 
 
