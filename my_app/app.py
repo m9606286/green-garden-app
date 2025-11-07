@@ -653,7 +653,7 @@ def main():
         selected_rows = grid_response.get("selected_rows", [])
 
         # ✅ 記錄使用者目前選到的客戶 (避免重新渲染後消失)
-        if selected_rows:
+        if len(selected_rows)>0:
             st.session_state.selected_customer = selected_rows[0]
             
         # ===================== 客戶明細卡片 =====================
@@ -919,6 +919,7 @@ def main():
 if __name__ == "__main__":
 
     main()
+
 
 
 
