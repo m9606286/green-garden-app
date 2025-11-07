@@ -150,7 +150,11 @@ def create_customer(customer_name, phone, email):
 def update_customer(customer_id, updates):
     supabase = get_supabase()
     resp = supabase.table("customers").update(updates).eq("id", customer_id).execute()
-    return resp.status_code == 200
+    
+    # 新版 SDK：resp 有 data 與 error
+    if resp.error:
+        return False
+    return True
 
 def delete_customer(customer_id):
     supabase = get_supabase()
@@ -922,6 +926,7 @@ def main():
 if __name__ == "__main__":
 
     main()
+
 
 
 
