@@ -652,8 +652,11 @@ def main():
             theme="streamlit")
         selected_rows = grid_response.get("selected_rows", [])
 
-        # ✅ 記錄使用者目前選到的客戶 (避免重新渲染後消失)
-        if selected_rows is not None and len(selected_rows) > 0:
+        # 有些版本 AgGrid 回傳的是 DataFrame，需要轉成 list(dict)
+        if isinstance(selected_rows, pd.DataFrame):
+            selected_rows = selected_rows.to_dict("records")
+
+        if selected_rows:  # 確保不是 None、不是空的
             st.session_state.selected_customer = selected_rows[0]
             
         # ===================== 客戶明細卡片 =====================
@@ -919,6 +922,7 @@ def main():
 if __name__ == "__main__":
 
     main()
+
 
 
 
