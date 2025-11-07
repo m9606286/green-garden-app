@@ -563,6 +563,12 @@ def format_currency(amount):
     if pd.isna(amount) or amount is None:
         return "0"
     return f"{amount:,.0f}"
+    
+def update_customer_db(customer_id, updates):
+    supabase = get_supabase()
+    resp = supabase.table("customers").update(updates).eq("id", customer_id).execute()
+    # 如果成功回傳 True
+    return resp.data is not None
 
 def update_customer_in_session(customer_id, updates):
     """更新 session_state 的資料"""
@@ -701,14 +707,14 @@ def main():
                 phone = st.text_input("電話", customer["phone"])
                 email = st.text_input("Email", customer["email"])
                 submitted = st.form_submit_button("💾 儲存修改")
-                if submitted:
-                    updates = {"customer_name": name, "phone": phone, "email": email}
-                    success = update_customer_in_session(customer["id"], updates)
-                    if success:
-                        st.success("✅ 已更新客戶")
-                       
-                    else:
-                        st.error("❌ 更新失敗")
+                db_success = update_customer_db(customer["id"], updates)
+    
+                if db_success:
+                   # 再更新 session_state
+                    update_customer_in_session(customer["id"], updates)
+                    st.success("✅ 已更新客戶")
+                else:
+                    st.error("❌ 更新失敗")
                 
     with tab2:
         # 產品選擇
@@ -946,6 +952,7 @@ def main():
 if __name__ == "__main__":
 
     main()
+
 
 
 
