@@ -679,9 +679,8 @@ def main():
                 email = st.text_input("Email", value=customer.get("email", ""))
                 updates = {}
                 submitted = st.form_submit_button("💾 儲存修改")
-                
-                if submitted:
-                    
+                rerun_flag = False  # 先定義 rerun flag
+                if submitted:                    
                     # 只更新有改變的欄位
                     if name != customer.get("customer_name", ""):
                         updates["customer_name"] = name
@@ -690,20 +689,23 @@ def main():
                     if email != customer.get("email", ""):
                         updates["email"] = email
 
-                if updates:
-                    st.write("更新客戶 id:", customer["id"])
-                    success = update_customer(customer["id"], updates)
-                    if success:
-                        st.success("✅ 已更新客戶資料")
-                        # 更新 session_state 小卡片資料
-                        st.session_state.selected_customer.update(updates)
-                        # 重新抓取最新資料同步表格
-                        customers = fetch_customers()
-                        st.experimental_rerun()
+                    if updates:
+                        st.write("更新客戶 id:", customer["id"])
+                        success = update_customer(customer["id"], updates)
+                        if success:
+                            st.success("✅ 已更新客戶資料")
+                            # 更新 session_state 小卡片資料
+                            st.session_state.selected_customer.update(updates)
+                            # 重新抓取最新資料同步表格
+                            customers = fetch_customers()
+                
+                        else:
+                            st.error("❌ 更新失敗")
                     else:
-                        st.error("❌ 更新失敗")
-                else:
-                    st.info("資料未修改，無需更新")
+                        st.info("資料未修改，無需更新")
+                    # form 區塊結束後才 rerun
+                if rerun_flag:
+                    st.experimental_rerun()
                 
     with tab2:
         # 產品選擇
@@ -941,6 +943,7 @@ def main():
 if __name__ == "__main__":
 
     main()
+
 
 
 
