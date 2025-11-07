@@ -652,40 +652,32 @@ def main():
             theme="streamlit")
         selected_rows = grid_response.get("selected_rows", [])
 
-        # 有些版本 AgGrid 回傳的是 DataFrame，需要轉成 list(dict)
         if isinstance(selected_rows, pd.DataFrame):
             selected_rows = selected_rows.to_dict("records")
+        elif isinstance(selected_rows, list) and len(selected_rows) > 0 and isinstance(selected_rows[0], pd.Series):
+            selected_rows = [r.to_dict() for r in selected_rows]
 
-        if selected_rows:  # 確保不是 None、不是空的
+        if selected_rows:
             st.session_state.selected_customer = selected_rows[0]
-            
-        # ===================== 客戶明細卡片 =====================
-        st.subheader("📄 客戶明細")
-        if "selected_customer" in st.session_state and st.session_state.selected_customer is not None:
+
+        # ================== 顯示小卡片 ==================
+        if "selected_customer" in st.session_state:
             customer = st.session_state.selected_customer
-            with st.container():
-                st.markdown("""
-                <div style="padding:15px;border-radius:10px;border:1px solid #ddd;background:#fafafa;">
-                """, unsafe_allow_html=True) 
-            col1, col2 = st.columns(2)
-            with col1:
-                name = st.text_input("姓名", customer["customer_name"])
-                phone = st.text_input("電話", customer["phone"])
+            st.subheader("📇 客戶小卡片")
+            st.markdown("---")
 
-            with col2:
-                email = st.text_input("Email", customer["email"])
+            # 用 form 方便編輯與提交
+            with st.form("edit_customer_form"):
+                name = st.text_input("姓名", value=customer.get("customer_name", ""))
+                phone = st.text_input("電話", value=customer.get("phone", ""))
+                email = st.text_input("Email", value=customer.get("email", ""))
+                submitted = st.form_submit_button("💾 儲存修改")
 
-            save = st.button("💾 儲存修改")
-
-            if save:
-                update_customer(customer["id"], name, phone, email)
-                st.success("✅ 已更新客戶資料")
-                st.rerun()
-
-            st.markdown("</div>", unsafe_allow_html=True)
-
-        else:
-            st.info("👆 請從上方表格點選一筆客戶")
+                if submitted:
+                    update_customer(customer["id"], name, phone, email)
+                    st.success("✅ 已更新客戶資料")
+                    st.experimental_rerun()  # 重新載入頁面，更新表格
+                
     with tab2:
         # 產品選擇
         col1, col2, col3 = st.columns(3)
@@ -922,6 +914,7 @@ def main():
 if __name__ == "__main__":
 
     main()
+
 
 
 
