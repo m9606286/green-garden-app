@@ -593,18 +593,18 @@ def show_customer_table(customers_df):
     )
 # ---------- 先初始化 selected_rows ----------
     selected_rows = []
-
     # 再嘗試從 grid_response 取資料
     if grid_response and "selected_rows" in grid_response:
         selected_rows = grid_response["selected_rows"]
-    # 如果是 DataFrame，轉成 list of dict
+
+    # 確保是 list 才用 len()
     if isinstance(selected_rows, pd.DataFrame):
         selected_rows = selected_rows.to_dict("records")
     elif isinstance(selected_rows, list) and len(selected_rows) > 0 and isinstance(selected_rows[0], pd.Series):
         selected_rows = [r.to_dict() for r in selected_rows]
 
-    # 這裡判斷是否有資料
-    if len(selected_rows) > 0:
+    # 最安全的判斷方式
+    if selected_rows and isinstance(selected_rows, list) and len(selected_rows) > 0:
         st.session_state.selected_customer = selected_rows[0]
 
 def main():
@@ -945,6 +945,7 @@ def main():
 if __name__ == "__main__":
 
     main()
+
 
 
 
