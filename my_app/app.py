@@ -674,9 +674,17 @@ def main():
                 submitted = st.form_submit_button("💾 儲存修改")
 
                 if submitted:
-                    update_customer(customer["id"], name, phone, email)
-                    st.success("✅ 已更新客戶資料")
-                    st.experimental_rerun()  # 重新載入頁面，更新表格
+                    updates = {
+                        "customer_name": name,
+                        "phone": phone,
+                        "email": email}
+                    
+                    success = update_customer(customer["id"], updates)
+                    if success:
+                        st.success("✅ 已更新客戶資料")
+                        st.experimental_rerun()
+                    else:
+                        st.error("❌ 更新失敗")
                 
     with tab2:
         # 產品選擇
@@ -914,6 +922,7 @@ def main():
 if __name__ == "__main__":
 
     main()
+
 
 
 
