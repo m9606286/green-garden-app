@@ -153,7 +153,7 @@ def update_customer(customer_id, updates):
     
     # resp 是字典
     # 成功判斷：data 有值且 count > 0
-    if resp.get("data") and resp.get("count", 0) > 0:
+    if resp.data and len(resp.data) > 0:
         return True
     return False
 
@@ -927,6 +927,7 @@ def main():
 if __name__ == "__main__":
 
     main()
+
 
 
 
