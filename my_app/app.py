@@ -681,7 +681,6 @@ def main():
 
                 if submitted:
                     st.write("更新客戶 id:", customer["id"])
-                    st.write("更新內容:", updates)
                     updates = {
                         "customer_name": name,
                         "phone": phone,
@@ -930,6 +929,7 @@ def main():
 if __name__ == "__main__":
 
     main()
+
 
 
 
