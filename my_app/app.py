@@ -151,10 +151,11 @@ def update_customer(customer_id, updates):
     supabase = get_supabase()
     resp = supabase.table("customers").update(updates).eq("id", customer_id).execute()
     
-    # 新版 SDK：resp 有 data 與 error
-    if resp.error:
-        return False
-    return True
+    # resp 是字典
+    # 成功判斷：data 有值且 count > 0
+    if resp.get("data") and resp.get("count", 0) > 0:
+        return True
+    return False
 
 def delete_customer(customer_id):
     supabase = get_supabase()
@@ -926,6 +927,7 @@ def main():
 if __name__ == "__main__":
 
     main()
+
 
 
 
