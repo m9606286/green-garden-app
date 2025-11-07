@@ -564,6 +564,38 @@ def format_currency(amount):
         return "0"
     return f"{amount:,.0f}"
 
+def update_customer_in_session(customer_id, updates):
+    """更新 session_state 的資料"""
+    for idx, c in enumerate(st.session_state.customers):
+        if c["id"] == customer_id:
+            st.session_state.customers[idx].update(updates)
+            # 如果目前選中的 customer 是這個，也同步更新
+            if "selected_customer" in st.session_state and st.session_state.selected_customer["id"] == customer_id:
+                st.session_state.selected_customer.update(updates)
+            return True
+    return False
+
+def show_customer_table(customers_df):
+    st.subheader("📋 客戶列表")
+    gb = GridOptionsBuilder.from_dataframe(customers_df)
+    gb.configure_selection("single")
+    gb.configure_column("customer_name", header_name="姓名")
+    gb.configure_column("phone", header_name="電話")
+    gb.configure_column("email", header_name="Email")
+    gridOptions = gb.build()
+
+    grid_response = AgGrid(
+        customers_df,
+        gridOptions=gridOptions,
+        update_mode=GridUpdateMode.SELECTION_CHANGED,
+        height=300,
+        theme="streamlit"
+    )
+
+    selected_rows = grid_response.get("selected_rows", [])
+    if selected_rows:
+        st.session_state.selected_customer = selected_rows[0]
+
 def main():
     # 初始化授權系統
     auth_system = AuthorizationSystem()
@@ -640,73 +672,31 @@ def main():
     tab1, tab2, tab3 = st.tabs(["🧑‍🤝‍🧑 客戶資料", "🛒 產品選擇", "📋 方案詳情"])
     
     with tab1:
-        customers = fetch_customers()
-        if isinstance(customers, list):
-            customers = pd.DataFrame(customers)
-        # ✅ AgGrid 欄位顯示中文
-        gb = GridOptionsBuilder.from_dataframe(customers)
-        gb.configure_selection("single")  # 單選
-        gb.configure_column("customer_name", header_name="姓名")
-        gb.configure_column("phone", header_name="電話")  
-        gridOptions = gb.build()
-        # ✅ 顯示表格，監聽選取
-        grid_response = AgGrid(
-            customers,
-            gridOptions=gridOptions,
-            update_mode=GridUpdateMode.SELECTION_CHANGED,
-            height=300,
-            theme="streamlit")
-        selected_rows = grid_response.get("selected_rows", [])
+        # 初始化資料
+        if "customers" not in st.session_state:
+            st.session_state.customers = fetch_customers()
 
-        if isinstance(selected_rows, pd.DataFrame):
-            selected_rows = selected_rows.to_dict("records")
-        elif isinstance(selected_rows, list) and len(selected_rows) > 0 and isinstance(selected_rows[0], pd.Series):
-            selected_rows = [r.to_dict() for r in selected_rows]
+        customers_df = pd.DataFrame(st.session_state.customers)
 
-        if selected_rows:
-            st.session_state.selected_customer = selected_rows[0]
+        # 顯示表格
+        show_customer_table(customers_df)
 
-        # ================== 顯示小卡片 ==================
+        # 顯示小卡片
         if "selected_customer" in st.session_state:
             customer = st.session_state.selected_customer
             st.subheader("📇 客戶小卡片")
-            st.markdown("---")
-
-            # 用 form 方便編輯與提交
-            with st.form("edit_customer_form"):
-                name = st.text_input("姓名", value=customer.get("customer_name", ""))
-                phone = st.text_input("電話", value=customer.get("phone", ""))
-                email = st.text_input("Email", value=customer.get("email", ""))
-                updates = {}
+            with st.form("edit_form"):
+                name = st.text_input("姓名", customer["customer_name"])
+                phone = st.text_input("電話", customer["phone"])
+                email = st.text_input("Email", customer["email"])
                 submitted = st.form_submit_button("💾 儲存修改")
-                rerun_flag = False  # 先定義 rerun flag
-                if submitted:                    
-                    # 只更新有改變的欄位
-                    if name != customer.get("customer_name", ""):
-                        updates["customer_name"] = name
-                    if phone != customer.get("phone", ""):
-                        updates["phone"] = phone
-                    if email != customer.get("email", ""):
-                        updates["email"] = email
-
-                    if updates:
-                        st.write("更新客戶 id:", customer["id"])
-                        success = update_customer(customer["id"], updates)
-                        if success:
-                            st.success("✅ 已更新客戶資料")
-                            # 更新 session_state 小卡片資料
-                            st.session_state.selected_customer.update(updates)
-                            # 重新抓取最新資料同步表格
-                            customers = fetch_customers()
-                            rerun_flag = True
-                
-                        else:
-                            st.error("❌ 更新失敗")
+                if submitted:
+                    updates = {"customer_name": name, "phone": phone, "email": email}
+                    success = update_customer_in_session(customer["id"], updates)
+                    if success:
+                        st.success("✅ 已更新客戶")
                     else:
-                        st.info("資料未修改，無需更新")
-                # form 區塊結束後才 rerun
-                if rerun_flag:
-                    st.experimental_rerun()
+                        st.error("❌ 更新失敗")
                 
     with tab2:
         # 產品選擇
@@ -944,6 +934,7 @@ def main():
 if __name__ == "__main__":
 
     main()
+
 
 
 
