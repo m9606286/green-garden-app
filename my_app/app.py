@@ -150,6 +150,7 @@ def create_customer(customer_name, phone, email):
 def update_customer(customer_id, updates):
     supabase = get_supabase()
     resp = supabase.table("customers").update(updates).eq("id", customer_id).execute()
+    st.write("Supabase 回傳:", resp)
     
     # resp 是字典
     # 成功判斷：data 有值且 count > 0
@@ -929,6 +930,7 @@ def main():
 if __name__ == "__main__":
 
     main()
+
 
 
 
