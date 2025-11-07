@@ -591,7 +591,12 @@ def show_customer_table(customers_df):
         height=300,
         theme="streamlit"
     )
+# ---------- 先初始化 selected_rows ----------
+    selected_rows = []
 
+    # 再嘗試從 grid_response 取資料
+    if grid_response and "selected_rows" in grid_response:
+        selected_rows = grid_response["selected_rows"]
     # 如果是 DataFrame，轉成 list of dict
     if isinstance(selected_rows, pd.DataFrame):
         selected_rows = selected_rows.to_dict("records")
@@ -940,6 +945,7 @@ def main():
 if __name__ == "__main__":
 
     main()
+
 
 
 
