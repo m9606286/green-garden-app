@@ -592,8 +592,14 @@ def show_customer_table(customers_df):
         theme="streamlit"
     )
 
-    selected_rows = grid_response.get("selected_rows", [])
-    if selected_rows:
+    # 如果是 DataFrame，轉成 list of dict
+    if isinstance(selected_rows, pd.DataFrame):
+        selected_rows = selected_rows.to_dict("records")
+    elif isinstance(selected_rows, list) and len(selected_rows) > 0 and isinstance(selected_rows[0], pd.Series):
+        selected_rows = [r.to_dict() for r in selected_rows]
+
+    # 這裡判斷是否有資料
+    if len(selected_rows) > 0:
         st.session_state.selected_customer = selected_rows[0]
 
 def main():
@@ -934,6 +940,7 @@ def main():
 if __name__ == "__main__":
 
     main()
+
 
 
 
