@@ -704,9 +704,9 @@ def main():
                             st.error("❌ 更新失敗")
                     else:
                         st.info("資料未修改，無需更新")
-                    # form 區塊結束後才 rerun
-                    if rerun_flag:
-                        st.experimental_rerun()
+                # form 區塊結束後才 rerun
+                if rerun_flag:
+                    st.experimental_rerun()
                 
     with tab2:
         # 產品選擇
@@ -944,6 +944,7 @@ def main():
 if __name__ == "__main__":
 
     main()
+
 
 
 
