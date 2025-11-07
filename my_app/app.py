@@ -698,6 +698,7 @@ def main():
                             st.session_state.selected_customer.update(updates)
                             # 重新抓取最新資料同步表格
                             customers = fetch_customers()
+                            rerun_flag = True
                 
                         else:
                             st.error("❌ 更新失敗")
@@ -943,6 +944,7 @@ def main():
 if __name__ == "__main__":
 
     main()
+
 
 
 
