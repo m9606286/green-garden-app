@@ -706,6 +706,9 @@ def main():
                     success = update_customer_in_session(customer["id"], updates)
                     if success:
                         st.success("✅ 已更新客戶")
+                        # 重新抓取最新列表
+                        show_customer_table(fetch_customers())
+                        st.session_state.selected_customer = None  # 清掉舊選擇
                     else:
                         st.error("❌ 更新失敗")
                 
@@ -945,6 +948,7 @@ def main():
 if __name__ == "__main__":
 
     main()
+
 
 
 
