@@ -679,6 +679,8 @@ def main():
                 submitted = st.form_submit_button("💾 儲存修改")
 
                 if submitted:
+                    st.write("更新客戶 id:", customer["id"])
+                    st.write("更新內容:", updates)
                     updates = {
                         "customer_name": name,
                         "phone": phone,
@@ -927,6 +929,7 @@ def main():
 if __name__ == "__main__":
 
     main()
+
 
 
 
