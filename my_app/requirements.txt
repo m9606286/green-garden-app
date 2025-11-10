@@ -3,5 +3,6 @@ pandas
 numpy
 matplotlib
 openpyxl
-supabase
+supabase-py
 st-aggrid
+
