@@ -4,7 +4,7 @@ numpy
 matplotlib
 openpyxl
 st-aggrid
-supabase-py==2.5.0
+
 
 
 
