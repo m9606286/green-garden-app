@@ -3,6 +3,8 @@ pandas
 numpy
 matplotlib
 openpyxl
+supabase-py==2.5.0
+st-aggrid==0.3.3
 
 
 
