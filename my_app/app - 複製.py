@@ -7,7 +7,7 @@ import io
 
 # 頁面配置
 st.set_page_config(
-    page_title="規劃配置建議書",
+    page_title="規劃配置建議",
     page_icon="📋",
     layout="wide"
 )
@@ -799,6 +799,7 @@ def main():
 if __name__ == "__main__":
 
     main()
+
 
 
 
