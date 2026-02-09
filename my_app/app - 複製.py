@@ -561,7 +561,7 @@ def main():
         st.session_state.selected_products = []
 
     # 主內容區域 - 兩個標籤頁
-    tab1, tab2 = st.tabs(["🛒 產品選擇", "📋 方案詳情"])
+    tab1, tab2 = st.tabs([" 產品選擇", "📋 方案詳情"])
 
     with tab1:
         # 產品選擇
@@ -799,6 +799,7 @@ def main():
 if __name__ == "__main__":
 
     main()
+
 
 
 
